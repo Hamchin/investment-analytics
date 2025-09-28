@@ -24,59 +24,65 @@ TICKER_NAME_TO_START_YEAR = {
 
 # === Streamlit アプリケーションの開始 ===
 
-st.title("Investment Analyzer")
+st.title("投資分析ツール")
 
 # 入力: 銘柄の選択
-ticker_name = st.selectbox("Ticker", list(TICKER_NAME_TO_SYMBOL.keys()), index=0)
+ticker_name = st.selectbox("銘柄", list(TICKER_NAME_TO_SYMBOL.keys()), index=0)
 ticker_symbol = TICKER_NAME_TO_SYMBOL[ticker_name]
 
 # 入力: 期間の指定方法
-period_mode = st.radio("How to Specify the Period", ("Period", "Start Year / End Year"), horizontal=True)
+period_mode = st.radio("期間の指定方法", ("直近 N 年間", "開始年 / 終了年"), horizontal=True)
 
 period = None
 start_date = None
 end_date = None
 
-# 入力: 期間の選択
-if period_mode == "Period":
-    period_name_to_period = {f"{i + 1} Years": f"{i + 1}y" for i in range(30)} | {"Max": "max"}
-    period_name = st.selectbox("Period", list(period_name_to_period.keys()), index=0)
+# 入力: 直近 N 年間の選択
+if period_mode == "直近 N 年間":
+    period_name_to_period = {f"{i + 1} 年": f"{i + 1}y" for i in range(30)}
+    period_name = st.selectbox("期間", list(period_name_to_period.keys()), index=0)
     period = period_name_to_period[period_name]
 
-# 入力: 開始年・終了年の選択
-if period_mode == "Start Year / End Year":
+# 入力: 開始年 / 終了年の選択
+if period_mode == "開始年 / 終了年":
     col_start_year, col_end_year = st.columns(2)
     years_range = range(TICKER_NAME_TO_START_YEAR[ticker_name], datetime.date.today().year + 1)
 
-    start_year_to_date = {f"{year}": f"{year}-01-01" for year in reversed(years_range)}
-    start_year = col_start_year.selectbox("Start Year", list(start_year_to_date.keys()), index=0)
+    start_year_to_date = {f"{year} 年": f"{year}-01-01" for year in reversed(years_range)}
+    start_year = col_start_year.selectbox("開始年", list(start_year_to_date.keys()), index=0)
     start_date = start_year_to_date[start_year]
 
-    end_year_to_date = {f"{year}": f"{year}-12-31" for year in reversed(years_range)}
-    end_year = col_end_year.selectbox("End Year", list(end_year_to_date.keys()), index=0)
+    end_year_to_date = {f"{year} 年": f"{year}-12-31" for year in reversed(years_range)}
+    end_year = col_end_year.selectbox("終了年", list(end_year_to_date.keys()), index=0)
     end_date = end_year_to_date[end_year]
 
     if start_year > end_year:
-        st.error("Start Year must be less than or equal to End Year.")
+        st.error("開始年は終了年より前の年または同じ年を選択してください。")
         st.stop()
 
-history_kwargs = {"period": period, "start": start_date, "end": end_date}
+# データの取得
+df = yf.Ticker(ticker_symbol).history(period=period, start=start_date, end=end_date)
 
-df = yf.Ticker(ticker_symbol).history(**history_kwargs)
-
+# 週次データの作成
 weekly_df = df["Close"].resample("W").last().to_frame()
 weekly_df["Return"] = weekly_df["Close"].pct_change() * 100
 weekly_df = weekly_df.dropna()
+weekly_df.index = weekly_df.index - pd.Timedelta(days=6)
 
 # === チャートの表示 ===
 
-st.subheader("Chart")
+st.subheader("チャート")
 
-st.caption("Red shaded areas indicate weeks with a drop of 5% or more.")
+col_threshold, col_condition = st.columns(2)
+
+threshold = col_threshold.number_input("強調表示の閾値 (%)", min_value=0.0, value=5.0, step=0.1)
+condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"), index=1)
+
+st.caption(f"赤色のエリアは 1 週間で {threshold:.2f}% 以上の{condition}があった週を示します。")
 
 fig = px.line(df.reset_index(), x="Date", y="Close")
 
-fig.update_layout(xaxis_title="Date", yaxis_title="Closing Price", hovermode="x unified")
+fig.update_layout(xaxis_title="日付", yaxis_title="終値", hovermode="x unified")
 
 fig.update_xaxes(
     rangeslider_visible=True,
@@ -95,45 +101,43 @@ fig.update_yaxes(
     spikesnap="cursor",
 )
 
-fig.update_traces(hovertemplate="Date: %{x|%Y-%m-%d}<br>Price: %{y:.2f} USD<extra></extra>")
+fig.update_traces(hovertemplate="日付: %{x|%Y-%m-%d}<br>終値: %{y:.2f} USD<extra></extra>")
 
-for date, row in weekly_df.iterrows():
-    if row["Return"] <= -5:
-        week_start = date - pd.Timedelta(days=6)
-        week_end = date
-        fig.add_vrect(
-            x0=week_start,
-            x1=week_end,
-            fillcolor="red",
-            opacity=0.2,
-            layer="below",
-            line_width=0,
-        )
+multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
+
+for date, row in weekly_df[weekly_df["Return"] * multiplier >= threshold].iterrows():
+    fig.add_vrect(
+        x0=date,
+        x1=(date + pd.Timedelta(days=6)),
+        fillcolor="red",
+        opacity=0.2,
+        layer="below",
+        line_width=0,
+    )
 
 st.plotly_chart(fig, use_container_width=True)
 
 # === 週次データの表示 ===
 
-st.subheader("Weekly Historical Data")
+st.subheader("週次データ")
 
 weekly_df = weekly_df.sort_index(ascending=False)
-weekly_df = weekly_df.rename(columns={"Close": "Closing Price (USD)", "Return": "Return (%)"})
+weekly_df = weekly_df.rename(columns={"Close": "終値 (USD)", "Return": "騰落率 (%)"})
 
-weekly_df.index = weekly_df.index - pd.Timedelta(days=6)
 weekly_df.index = weekly_df.index.date
-weekly_df.index.name = "Date"
+weekly_df.index.name = "日付"
 
 
 def apply_color(row: pd.Series) -> pd.Series:
-    color = "color: green" if row["Return (%)"] >= 0 else "color: red"
+    color = "color: green" if row["騰落率 (%)"] >= 0 else "color: red"
     styles = pd.Series("", index=row.index)
-    styles["Closing Price (USD)"] = color
-    styles["Return (%)"] = color
+    styles["終値 (USD)"] = color
+    styles["騰落率 (%)"] = color
     return styles
 
 
 styled_weekly_df = weekly_df.style.apply(apply_color, axis=1).format(
-    {"Closing Price (USD)": "{:.2f}", "Return (%)": "{:+.2f}%"}
+    {"終値 (USD)": "{:.2f}", "騰落率 (%)": "{:+.2f}%"}
 )
 
 st.dataframe(styled_weekly_df)

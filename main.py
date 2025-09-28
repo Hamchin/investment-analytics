@@ -4,7 +4,10 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import yfinance as yf
+from streamlit_autorefresh import st_autorefresh
 
+
+st_autorefresh(interval=60000)
 
 # === 選択肢の定義 ===
 
@@ -60,11 +63,13 @@ if period_mode == "開始年 / 終了年":
         st.error("開始年は終了年より前の年または同じ年を選択してください。")
         st.stop()
 
-# データの取得
-df = yf.Ticker(ticker_symbol).history(period=period, start=start_date, end=end_date)
+# 日次データの作成
+daily_df = yf.Ticker(ticker_symbol).history(period=period, start=start_date, end=end_date)
+daily_df["Return"] = daily_df["Close"].pct_change() * 100
+daily_df = daily_df.dropna()
 
 # 週次データの作成
-weekly_df = df["Close"].resample("W").last().to_frame()
+weekly_df = daily_df["Close"].resample("W").last().to_frame()
 weekly_df["Return"] = weekly_df["Close"].pct_change() * 100
 weekly_df = weekly_df.dropna()
 weekly_df.index = weekly_df.index - pd.Timedelta(days=6)
@@ -80,7 +85,7 @@ condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"
 
 st.caption(f"赤色のエリアは 1 週間で {threshold:.2f}% 以上の{condition}があった週を示します。")
 
-fig = px.line(df.reset_index(), x="Date", y="Close")
+fig = px.line(daily_df.reset_index(), x="Date", y="Close")
 
 fig.update_layout(xaxis_title="日付", yaxis_title="終値", hovermode="x unified")
 
@@ -117,27 +122,63 @@ for date, row in weekly_df[weekly_df["Return"] * multiplier >= threshold].iterro
 
 st.plotly_chart(fig, use_container_width=True)
 
+# === 日次データの表示 ===
+
+st.subheader("日次データ")
+
+# 入力: 移動平均の期間
+ma_period = st.number_input("移動平均の期間 (日)", min_value=1, max_value=200, value=100, step=1)
+
+daily_df["MA"] = daily_df["Close"].rolling(window=ma_period).mean()
+daily_df["MAD"] = ((daily_df["Close"] - daily_df["MA"]) / daily_df["MA"]) * 100
+
+formatted_daily_df = daily_df[["Close", "Return", "MAD"]]
+formatted_daily_df = formatted_daily_df.sort_index(ascending=False)
+
+renamer = {"Close": "終値 (USD)", "Return": "騰落率 (%)", "MAD": "移動平均乖離率 (%)"}
+formatted_daily_df = formatted_daily_df.rename(columns=renamer)
+
+formatted_daily_df.index = formatted_daily_df.index.date
+formatted_daily_df.index.name = "日付"
+
+
+def apply_color_daily(row: pd.Series) -> pd.Series:
+    color_return = "color: green" if row["騰落率 (%)"] >= 0 else "color: red"
+    color_deviation = "color: green" if row["移動平均乖離率 (%)"] >= 0 else "color: red"
+    styles = pd.Series("", index=row.index)
+    styles["終値 (USD)"] = color_return
+    styles["騰落率 (%)"] = color_return
+    styles["移動平均乖離率 (%)"] = color_deviation
+    return styles
+
+
+formatter = {"終値 (USD)": "{:.2f}", "騰落率 (%)": "{:+.2f}%", "移動平均乖離率 (%)": "{:+.2f}%"}
+styled_daily_df = formatted_daily_df.style.apply(apply_color_daily, axis=1).format(formatter)
+
+st.dataframe(styled_daily_df)
+
 # === 週次データの表示 ===
 
 st.subheader("週次データ")
 
-weekly_df = weekly_df.sort_index(ascending=False)
-weekly_df = weekly_df.rename(columns={"Close": "終値 (USD)", "Return": "騰落率 (%)"})
+formatted_weekly_df = weekly_df.sort_index(ascending=False)
 
-weekly_df.index = weekly_df.index.date
-weekly_df.index.name = "日付"
+renamer = {"Close": "終値 (USD)", "Return": "騰落率 (%)"}
+formatted_weekly_df = formatted_weekly_df.rename(columns=renamer)
+
+formatted_weekly_df.index = formatted_weekly_df.index.date
+formatted_weekly_df.index.name = "日付"
 
 
-def apply_color(row: pd.Series) -> pd.Series:
-    color = "color: green" if row["騰落率 (%)"] >= 0 else "color: red"
+def apply_color_weekly(row: pd.Series) -> pd.Series:
+    color_return = "color: green" if row["騰落率 (%)"] >= 0 else "color: red"
     styles = pd.Series("", index=row.index)
-    styles["終値 (USD)"] = color
-    styles["騰落率 (%)"] = color
+    styles["終値 (USD)"] = color_return
+    styles["騰落率 (%)"] = color_return
     return styles
 
 
-styled_weekly_df = weekly_df.style.apply(apply_color, axis=1).format(
-    {"終値 (USD)": "{:.2f}", "騰落率 (%)": "{:+.2f}%"}
-)
+formatter = {"終値 (USD)": "{:.2f}", "騰落率 (%)": "{:+.2f}%"}
+styled_weekly_df = formatted_weekly_df.style.apply(apply_color_weekly, axis=1).format(formatter)
 
 st.dataframe(styled_weekly_df)

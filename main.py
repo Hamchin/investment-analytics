@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import yfinance as yf
+from dateutil.relativedelta import relativedelta
 from streamlit_autorefresh import st_autorefresh
 
 
@@ -36,26 +37,27 @@ ticker_symbol = TICKER_NAME_TO_SYMBOL[ticker_name]
 # 入力: 期間の指定方法
 period_mode = st.radio("期間の指定方法", ("直近 N 年間", "開始年 / 終了年"), horizontal=True)
 
-period = None
 start_date = None
 end_date = None
 
 # 入力: 直近 N 年間の選択
 if period_mode == "直近 N 年間":
-    period_name_to_period = {f"{i + 1} 年": f"{i + 1}y" for i in range(30)}
+    period_name_to_period = {f"{i + 1} 年": i + 1 for i in range(30)}
     period_name = st.selectbox("期間", list(period_name_to_period.keys()), index=0)
     period = period_name_to_period[period_name]
+    end_date = datetime.date.today()
+    start_date = end_date - relativedelta(years=period)
 
 # 入力: 開始年 / 終了年の選択
 if period_mode == "開始年 / 終了年":
     col_start_year, col_end_year = st.columns(2)
     years_range = range(TICKER_NAME_TO_START_YEAR[ticker_name], datetime.date.today().year + 1)
 
-    start_year_to_date = {f"{year} 年": f"{year}-01-01" for year in reversed(years_range)}
+    start_year_to_date = {f"{year} 年": datetime.date(year, 1, 1) for year in reversed(years_range)}
     start_year = col_start_year.selectbox("開始年", list(start_year_to_date.keys()), index=0)
     start_date = start_year_to_date[start_year]
 
-    end_year_to_date = {f"{year} 年": f"{year}-12-31" for year in reversed(years_range)}
+    end_year_to_date = {f"{year} 年": datetime.date(year, 12, 31) for year in reversed(years_range)}
     end_year = col_end_year.selectbox("終了年", list(end_year_to_date.keys()), index=0)
     end_date = end_year_to_date[end_year]
 
@@ -63,8 +65,11 @@ if period_mode == "開始年 / 終了年":
         st.error("開始年は終了年より前の年または同じ年を選択してください。")
         st.stop()
 
+if start_date is None or end_date is None:
+    raise ValueError("Both start_date and end_date must be set.")
+
 # 日次データの作成
-daily_df = yf.Ticker(ticker_symbol).history(period=period, start=start_date, end=end_date)
+daily_df = yf.Ticker(ticker_symbol).history(start=(start_date - datetime.timedelta(days=200)), end=end_date)
 daily_df["Return"] = daily_df["Close"].pct_change() * 100
 daily_df = daily_df.dropna()
 
@@ -73,6 +78,7 @@ weekly_df = daily_df["Close"].resample("W").last().to_frame()
 weekly_df["Return"] = weekly_df["Close"].pct_change() * 100
 weekly_df = weekly_df.dropna()
 weekly_df.index = weekly_df.index - pd.Timedelta(days=6)
+weekly_df = weekly_df[weekly_df.index.date >= start_date]
 
 # === チャートの表示 ===
 
@@ -85,7 +91,8 @@ condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"
 
 st.caption(f"赤色のエリアは 1 週間で {threshold:.2f}% 以上の{condition}があった週を示します。")
 
-fig = px.line(daily_df.reset_index(), x="Date", y="Close")
+plotted_daily_df = daily_df[daily_df.index.date >= start_date].reset_index()
+fig = px.line(plotted_daily_df, x="Date", y="Close")
 
 fig.update_layout(xaxis_title="日付", yaxis_title="終値", hovermode="x unified")
 
@@ -131,6 +138,7 @@ ma_period = st.number_input("移動平均の期間 (日)", min_value=1, max_valu
 
 daily_df["MA"] = daily_df["Close"].rolling(window=ma_period).mean()
 daily_df["MAD"] = ((daily_df["Close"] - daily_df["MA"]) / daily_df["MA"]) * 100
+daily_df = daily_df[daily_df.index.date >= start_date]
 
 formatted_daily_df = daily_df[["Close", "Return", "MAD"]]
 formatted_daily_df = formatted_daily_df.sort_index(ascending=False)

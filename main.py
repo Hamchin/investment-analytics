@@ -10,7 +10,7 @@ from streamlit_autorefresh import st_autorefresh
 
 st_autorefresh(interval=60000)
 
-# === 選択肢の定義 ===
+# ========== 選択肢の定義 ==========
 
 TICKER_NAME_TO_SYMBOL = {
     "S&P500": "^GSPC",
@@ -26,7 +26,7 @@ TICKER_NAME_TO_START_YEAR = {
     "ETH": 2017,
 }
 
-# === Streamlit アプリケーションの開始 ===
+# ========== Streamlit アプリケーションの開始 ==========
 
 st.title("投資分析ツール")
 
@@ -80,7 +80,7 @@ weekly_df = weekly_df.dropna()
 weekly_df.index = weekly_df.index - pd.Timedelta(days=6)
 weekly_df = weekly_df[weekly_df.index.date >= start_date]
 
-# === チャートの表示 ===
+# ========== チャートの表示 ==========
 
 st.subheader("チャート")
 
@@ -132,7 +132,7 @@ for date, row in weekly_df[weekly_df["Change"] * multiplier >= threshold].iterro
 
 st.plotly_chart(fig, use_container_width=True)
 
-# === 日次データの表示 ===
+# ========== 日次データの表示 ==========
 
 st.subheader("日次データ")
 
@@ -170,7 +170,7 @@ styled_daily_df = formatted_daily_df.style.apply(apply_color_daily, axis=1).form
 
 st.dataframe(styled_daily_df)
 
-# === 週次データの表示 ===
+# ========== 週次データの表示 ==========
 
 st.subheader("週次データ")
 

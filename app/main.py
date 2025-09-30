@@ -31,7 +31,13 @@ TICKER_NAME_TO_START_YEAR = {
 st.title("投資分析ツール")
 
 # 入力: 銘柄の選択
-ticker_name = st.selectbox("銘柄", list(TICKER_NAME_TO_SYMBOL.keys()), index=0)
+ticker_name = st.selectbox(
+    "銘柄",
+    list(TICKER_NAME_TO_SYMBOL),
+    index=list(TICKER_NAME_TO_SYMBOL).index(st.query_params.get("ticker", "S&P500")),
+    key="ticker",
+    on_change=lambda: st.query_params.update({"ticker": st.session_state["ticker"]}),
+)
 ticker_symbol = TICKER_NAME_TO_SYMBOL[ticker_name]
 
 # 入力: 期間の指定方法
@@ -43,7 +49,7 @@ end_date = None
 # 入力: 期間の選択
 if period_mode == "期間":
     period_name_to_period = {f"{i + 1} 年": i + 1 for i in range(30)}
-    period_name = st.selectbox("期間", list(period_name_to_period.keys()), index=0)
+    period_name = st.selectbox("期間", list(period_name_to_period), index=0)
     period = period_name_to_period[period_name]
     end_date = datetime.date.today() + datetime.timedelta(days=1)
     start_date = end_date - relativedelta(years=period)
@@ -54,11 +60,11 @@ if period_mode == "開始年・終了年":
     years_range = range(TICKER_NAME_TO_START_YEAR[ticker_name], datetime.date.today().year + 1)
 
     start_year_to_date = {f"{year} 年": datetime.date(year, 1, 1) for year in reversed(years_range)}
-    start_year = col_start_year.selectbox("開始年", list(start_year_to_date.keys()), index=0)
+    start_year = col_start_year.selectbox("開始年", list(start_year_to_date), index=0)
     start_date = start_year_to_date[start_year]
 
     end_year_to_date = {f"{year} 年": datetime.date(year + 1, 1, 1) for year in reversed(years_range)}
-    end_year = col_end_year.selectbox("終了年", list(end_year_to_date.keys()), index=0)
+    end_year = col_end_year.selectbox("終了年", list(end_year_to_date), index=0)
     end_date = end_year_to_date[end_year]
 
     if start_year > end_year:

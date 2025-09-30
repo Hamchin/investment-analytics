@@ -35,21 +35,21 @@ ticker_name = st.selectbox("銘柄", list(TICKER_NAME_TO_SYMBOL.keys()), index=0
 ticker_symbol = TICKER_NAME_TO_SYMBOL[ticker_name]
 
 # 入力: 期間の指定方法
-period_mode = st.radio("期間の指定方法", ("直近 N 年間", "開始年 / 終了年"), horizontal=True)
+period_mode = st.radio("期間の指定方法", ("期間", "開始年・終了年"), horizontal=True)
 
 start_date = None
 end_date = None
 
-# 入力: 直近 N 年間の選択
-if period_mode == "直近 N 年間":
+# 入力: 期間の選択
+if period_mode == "期間":
     period_name_to_period = {f"{i + 1} 年": i + 1 for i in range(30)}
     period_name = st.selectbox("期間", list(period_name_to_period.keys()), index=0)
     period = period_name_to_period[period_name]
     end_date = datetime.date.today() + datetime.timedelta(days=1)
     start_date = end_date - relativedelta(years=period)
 
-# 入力: 開始年 / 終了年の選択
-if period_mode == "開始年 / 終了年":
+# 入力: 開始年・終了年の選択
+if period_mode == "開始年・終了年":
     col_start_year, col_end_year = st.columns(2)
     years_range = range(TICKER_NAME_TO_START_YEAR[ticker_name], datetime.date.today().year + 1)
 

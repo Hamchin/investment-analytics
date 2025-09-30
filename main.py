@@ -45,7 +45,7 @@ if period_mode == "直近 N 年間":
     period_name_to_period = {f"{i + 1} 年": i + 1 for i in range(30)}
     period_name = st.selectbox("期間", list(period_name_to_period.keys()), index=0)
     period = period_name_to_period[period_name]
-    end_date = datetime.date.today()
+    end_date = datetime.date.today() + datetime.timedelta(days=1)
     start_date = end_date - relativedelta(years=period)
 
 # 入力: 開始年 / 終了年の選択
@@ -57,7 +57,7 @@ if period_mode == "開始年 / 終了年":
     start_year = col_start_year.selectbox("開始年", list(start_year_to_date.keys()), index=0)
     start_date = start_year_to_date[start_year]
 
-    end_year_to_date = {f"{year} 年": datetime.date(year, 12, 31) for year in reversed(years_range)}
+    end_year_to_date = {f"{year} 年": datetime.date(year + 1, 1, 1) for year in reversed(years_range)}
     end_year = col_end_year.selectbox("終了年", list(end_year_to_date.keys()), index=0)
     end_date = end_year_to_date[end_year]
 

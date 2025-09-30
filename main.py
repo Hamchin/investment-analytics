@@ -70,12 +70,12 @@ if start_date is None or end_date is None:
 
 # 日次データの作成
 daily_df = yf.Ticker(ticker_symbol).history(start=(start_date - datetime.timedelta(days=200)), end=end_date)
-daily_df["Return"] = daily_df["Close"].pct_change() * 100
+daily_df["Change"] = daily_df["Close"].pct_change() * 100
 daily_df = daily_df.dropna()
 
 # 週次データの作成
 weekly_df = daily_df["Close"].resample("W").last().to_frame()
-weekly_df["Return"] = weekly_df["Close"].pct_change() * 100
+weekly_df["Change"] = weekly_df["Close"].pct_change() * 100
 weekly_df = weekly_df.dropna()
 weekly_df.index = weekly_df.index - pd.Timedelta(days=6)
 weekly_df = weekly_df[weekly_df.index.date >= start_date]
@@ -84,8 +84,11 @@ weekly_df = weekly_df[weekly_df.index.date >= start_date]
 
 st.subheader("チャート")
 
-col_threshold, col_condition = st.columns(2)
+chart_settings_expander = st.expander("設定")
 
+col_threshold, col_condition = chart_settings_expander.columns(2)
+
+# 入力: 強調表示の閾値と条件
 threshold = col_threshold.number_input("強調表示の閾値 (%)", min_value=0.0, value=5.0, step=0.1)
 condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"), index=1)
 
@@ -117,7 +120,7 @@ fig.update_traces(hovertemplate="日付: %{x|%Y-%m-%d}<br>終値: %{y:.2f} USD<e
 
 multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
 
-for date, row in weekly_df[weekly_df["Return"] * multiplier >= threshold].iterrows():
+for date, row in weekly_df[weekly_df["Change"] * multiplier >= threshold].iterrows():
     fig.add_vrect(
         x0=date,
         x1=(date + pd.Timedelta(days=6)),
@@ -133,17 +136,19 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.subheader("日次データ")
 
+daily_settings_expander = st.expander("設定")
+
 # 入力: 移動平均の期間
-ma_period = st.number_input("移動平均の期間 (日)", min_value=1, max_value=200, value=100, step=1)
+ma_period = daily_settings_expander.number_input("移動平均の期間 (日)", min_value=1, max_value=200, value=100, step=1)
 
 daily_df["MA"] = daily_df["Close"].rolling(window=ma_period).mean()
 daily_df["MAD"] = ((daily_df["Close"] - daily_df["MA"]) / daily_df["MA"]) * 100
 daily_df = daily_df[daily_df.index.date >= start_date]
 
-formatted_daily_df = daily_df[["Close", "Return", "MAD"]]
+formatted_daily_df = daily_df[["Close", "Change", "MAD"]]
 formatted_daily_df = formatted_daily_df.sort_index(ascending=False)
 
-renamer = {"Close": "終値 (USD)", "Return": "騰落率 (%)", "MAD": "移動平均乖離率 (%)"}
+renamer = {"Close": "終値 (USD)", "Change": "騰落率 (%)", "MAD": "移動平均乖離率 (%)"}
 formatted_daily_df = formatted_daily_df.rename(columns=renamer)
 
 formatted_daily_df.index = formatted_daily_df.index.date
@@ -171,7 +176,7 @@ st.subheader("週次データ")
 
 formatted_weekly_df = weekly_df.sort_index(ascending=False)
 
-renamer = {"Close": "終値 (USD)", "Return": "騰落率 (%)"}
+renamer = {"Close": "終値 (USD)", "Change": "騰落率 (%)"}
 formatted_weekly_df = formatted_weekly_df.rename(columns=renamer)
 
 formatted_weekly_df.index = formatted_weekly_df.index.date

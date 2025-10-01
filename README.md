@@ -1,4 +1,4 @@
-# Investment Analyzer
+# Investment Analytics
 
 ## 開発方法
 

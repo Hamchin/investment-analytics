@@ -4,31 +4,14 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import yfinance as yf
+from constants import TICKER_NAME_TO_START_YEAR
+from constants import TICKER_NAME_TO_SYMBOL
 from dateutil.relativedelta import relativedelta
 from streamlit_autorefresh import st_autorefresh
 
 
+# 1 分ごとに自動更新
 st_autorefresh(interval=60000)
-
-# ========== 選択肢の定義 ==========
-
-TICKER_NAME_TO_SYMBOL = {
-    "S&P500": "^GSPC",
-    "NASDAQ100": "^NDX",
-    "QLD": "QLD",
-    "SOXL": "SOXL",
-    "BTC": "BTC-USD",
-    "ETH": "ETH-USD",
-}
-
-TICKER_NAME_TO_START_YEAR = {
-    "S&P500": 1928,
-    "NASDAQ100": 1985,
-    "QLD": 2006,
-    "SOXL": 2010,
-    "BTC": 2014,
-    "ETH": 2017,
-}
 
 # ========== Streamlit アプリケーションの開始 ==========
 

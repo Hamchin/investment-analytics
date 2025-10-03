@@ -17,7 +17,7 @@ st_autorefresh(interval=60000)
 
 st.title("時系列分析")
 
-# 入力: 銘柄の選択
+# 入力: 銘柄
 ticker_name = st.selectbox(
     "銘柄",
     list(TICKER_NAME_TO_SYMBOL),
@@ -33,7 +33,7 @@ period_mode = st.radio("期間の指定方法", ("期間", "開始年・終了�
 start_date = None
 end_date = None
 
-# 入力: 期間の選択
+# 入力: 期間
 if period_mode == "期間":
     period_name_to_period = {f"{i + 1} 年": i + 1 for i in range(30)}
     period_name = st.selectbox("期間", list(period_name_to_period), index=0)
@@ -41,7 +41,7 @@ if period_mode == "期間":
     end_date = datetime.date.today() + datetime.timedelta(days=1)
     start_date = end_date - relativedelta(years=period)
 
-# 入力: 開始年・終了年の選択
+# 入力: 開始年・終了年
 if period_mode == "開始年・終了年":
     col_start_year, col_end_year = st.columns(2)
     years_range = range(TICKER_NAME_TO_START_YEAR[ticker_name], datetime.date.today().year + 1)
@@ -61,15 +61,21 @@ if period_mode == "開始年・終了年":
 if start_date is None or end_date is None:
     raise ValueError("Both start_date and end_date must be set.")
 
+settings_expander = st.expander("設定")
+
+# 入力: 移動平均の期間
+ma_period = settings_expander.number_input("移動平均の期間 (日)", min_value=1, max_value=200, value=100, step=1)
+
 # 日次データの作成
 daily_df = yf.Ticker(ticker_symbol).history(start=(start_date - datetime.timedelta(days=200)), end=end_date)
 daily_df["Change"] = daily_df["Close"].pct_change() * 100
-daily_df = daily_df.dropna()
+daily_df["MA"] = daily_df["Close"].rolling(window=ma_period).mean()
+daily_df["MAD"] = ((daily_df["Close"] - daily_df["MA"]) / daily_df["MA"]) * 100
+daily_df = daily_df[daily_df.index.date >= start_date]
 
 # 週次データの作成
 weekly_df = daily_df["Close"].resample("W").last().to_frame()
 weekly_df["Change"] = weekly_df["Close"].pct_change() * 100
-weekly_df = weekly_df.dropna()
 weekly_df.index = weekly_df.index - pd.Timedelta(days=6)
 weekly_df = weekly_df[weekly_df.index.date >= start_date]
 
@@ -87,8 +93,7 @@ condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"
 
 st.caption(f"赤色のエリアは 1 週間で {threshold:.2f}% 以上の{condition}があった週を示します。")
 
-plotted_daily_df = daily_df[daily_df.index.date >= start_date].reset_index()
-fig = px.line(plotted_daily_df, x="Date", y="Close")
+fig = px.line(daily_df.reset_index(), x="Date", y="Close")
 
 fig.update_layout(xaxis_title="日付", yaxis_title="終値", hovermode="x unified")
 
@@ -128,15 +133,6 @@ st.plotly_chart(fig, use_container_width=True)
 # ========== 日次データの表示 ==========
 
 st.subheader("日次データ")
-
-daily_settings_expander = st.expander("設定")
-
-# 入力: 移動平均の期間
-ma_period = daily_settings_expander.number_input("移動平均の期間 (日)", min_value=1, max_value=200, value=100, step=1)
-
-daily_df["MA"] = daily_df["Close"].rolling(window=ma_period).mean()
-daily_df["MAD"] = ((daily_df["Close"] - daily_df["MA"]) / daily_df["MA"]) * 100
-daily_df = daily_df[daily_df.index.date >= start_date]
 
 formatted_daily_df = daily_df[["Close", "Change", "MAD"]]
 formatted_daily_df = formatted_daily_df.sort_index(ascending=False)

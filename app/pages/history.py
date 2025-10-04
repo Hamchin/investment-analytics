@@ -13,7 +13,7 @@ from streamlit_autorefresh import st_autorefresh
 # 1 分ごとに自動更新
 st_autorefresh(interval=60000)
 
-# ========== Streamlit アプリケーションの開始 ==========
+# ========== 入力ウィジェットの表示 ==========
 
 st.title("時系列分析")
 
@@ -22,8 +22,8 @@ ticker_name = st.selectbox(
     "銘柄",
     list(TICKER_NAME_TO_SYMBOL),
     index=list(TICKER_NAME_TO_SYMBOL).index(st.query_params.get("ticker", "S&P500")),
-    key="ticker",
-    on_change=lambda: st.query_params.update({"ticker": st.session_state["ticker"]}),
+    key="history_ticker",
+    on_change=lambda: st.query_params.update({"ticker": st.session_state["history_ticker"]}),
 )
 ticker_symbol = TICKER_NAME_TO_SYMBOL[ticker_name]
 
@@ -128,7 +128,7 @@ for date, row in weekly_df[weekly_df["Change"] * multiplier >= threshold].iterro
         line_width=0,
     )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig)
 
 # ========== 日次データの表示 ==========
 

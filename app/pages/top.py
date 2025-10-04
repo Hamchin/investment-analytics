@@ -7,4 +7,5 @@ st.markdown("株式や暗号資産の価格データをもとに、様々な分�
 
 st.subheader("メニュー")
 
-st.page_link("pages/history.py", label="時系列分析", icon=":material/analytics:")
+st.page_link("pages/realtime.py", label="リアルタイム分析", icon=":material/show_chart:")
+st.page_link("pages/history.py", label="時系列分析", icon=":material/finance:")

@@ -15,3 +15,12 @@ TICKER_NAME_TO_START_YEAR = {
     "BTC": 2014,
     "ETH": 2017,
 }
+
+TICKER_NAME_TO_HOURS = {
+    "S&P500": 6.5,
+    "NASDAQ100": 6.5,
+    "QLD": 6.5,
+    "SOXL": 6.5,
+    "BTC": 24,
+    "ETH": 24,
+}

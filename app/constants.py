@@ -5,6 +5,8 @@ TICKER_NAME_TO_SYMBOL = {
     "SOXL": "SOXL",
     "BTC": "BTC-USD",
     "ETH": "ETH-USD",
+    "GOLD": "GC=F",
+    "USD/JPY": "JPY=X",
 }
 
 TICKER_NAME_TO_START_YEAR = {
@@ -14,6 +16,8 @@ TICKER_NAME_TO_START_YEAR = {
     "SOXL": 2010,
     "BTC": 2014,
     "ETH": 2017,
+    "GOLD": 2000,
+    "USD/JPY": 1996,
 }
 
 TICKER_NAME_TO_HOURS = {
@@ -23,4 +27,6 @@ TICKER_NAME_TO_HOURS = {
     "SOXL": 6.5,
     "BTC": 24,
     "ETH": 24,
+    "GOLD": 24,
+    "USD/JPY": 24,
 }

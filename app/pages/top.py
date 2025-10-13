@@ -3,7 +3,7 @@ import streamlit as st
 
 st.title("投資分析ツール")
 
-st.markdown("株式や暗号資産の価格データをもとに、様々な分析を行うことができます。")
+st.markdown("株式や暗号資産などの価格データをもとに、様々な分析を行うことができます。")
 
 st.subheader("メニュー")
 

@@ -26,6 +26,16 @@ def update_ticker_data(id: str, key: str) -> None:
     st.session_state["realtime_ticker_data"][id] = st.session_state[key]
 
 
+def move_ticker_data(id: str, direction: str) -> None:
+    id_list = list(st.session_state["realtime_ticker_data"].keys())
+    index = id_list.index(id)
+    if direction == "back" and index > 0:
+        id_list[index], id_list[index - 1] = id_list[index - 1], id_list[index]
+    if direction == "forward" and index < len(id_list) - 1:
+        id_list[index], id_list[index + 1] = id_list[index + 1], id_list[index]
+    st.session_state["realtime_ticker_data"] = {id: st.session_state["realtime_ticker_data"][id] for id in id_list}
+
+
 def remove_ticker_data(id: str) -> None:
     del st.session_state["realtime_ticker_data"][id]
 
@@ -46,6 +56,8 @@ global_columns = st.columns(3)
 for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data"].items()):
     global_column = global_columns[index % 3]
     container = global_column.container(border=True)
+
+    # 銘柄のセレクトボックス
     container.selectbox(
         "銘柄",
         list(TICKER_NAME_TO_SYMBOL),
@@ -54,14 +66,31 @@ for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data
         on_change=update_ticker_data,
         args=(id, f"realtime_ticker_{id}"),
     )
+
+    # リアルタイム情報を表示するコンテナ
     inner_container = container.container()
-    container.button(
+    id_to_container[id] = inner_container
+
+    # コンテナを移動・削除するボタン
+    button_columns = container.columns([1, 1, 1, 3])
+    button_columns[0].button(
+        ":material/arrow_back_ios_new:",
+        key=f"move_back_ticker_{id}",
+        on_click=move_ticker_data,
+        args=(id, "back"),
+    )
+    button_columns[1].button(
+        ":material/arrow_forward_ios:",
+        key=f"move_forward_ticker_{id}",
+        on_click=move_ticker_data,
+        args=(id, "forward"),
+    )
+    button_columns[2].button(
         ":material/delete:",
         key=f"remove_ticker_{id}",
         on_click=remove_ticker_data,
         args=(id,),
     )
-    id_to_container[id] = inner_container
 
 st.button(":material/add_2:", on_click=append_ticker_data)
 

@@ -102,8 +102,8 @@ for id, container in id_to_container.items():
 
     # 現在値と前日比の表示
     df = ticker.history(period="3d")
-    previous_price = df["Close"].iloc[0]
-    current_price = df["Close"].iloc[1]
+    current_price = df["Close"].iloc[-1]
+    previous_price = df["Close"].iloc[-2]
     change = (current_price - previous_price) / previous_price * 100
     color = "green" if change >= 0 else "red"
     container.subheader(f"{current_price:.2f} :{color}[({change:.2f}%)]")

@@ -17,9 +17,9 @@ st_autorefresh(interval=60000)
 st.title("リアルタイム分析")
 
 
-def append_ticker_data() -> None:
+def append_ticker_data(ticker_name: str = "S&P500") -> None:
     id = str(uuid.uuid4())
-    st.session_state["realtime_ticker_data"][id] = "S&P500"
+    st.session_state["realtime_ticker_data"][id] = ticker_name
 
 
 def update_ticker_data(id: str, key: str) -> None:
@@ -32,7 +32,12 @@ def remove_ticker_data(id: str) -> None:
 
 if "realtime_ticker_data" not in st.session_state:
     st.session_state["realtime_ticker_data"] = {}
-    append_ticker_data()
+    append_ticker_data("S&P500")
+    append_ticker_data("NASDAQ100")
+    append_ticker_data("QLD")
+    append_ticker_data("SOXL")
+    append_ticker_data("BTC")
+    append_ticker_data("ETH")
 
 id_to_container = {}
 
@@ -67,7 +72,7 @@ for id, container in id_to_container.items():
     ticker = yf.Ticker(TICKER_NAME_TO_SYMBOL[ticker_name])
 
     # 現在値と前日比の表示
-    df = ticker.history(period="2d")
+    df = ticker.history(period="3d")
     previous_price = df["Close"].iloc[0]
     current_price = df["Close"].iloc[1]
     change = (current_price - previous_price) / previous_price * 100

@@ -97,7 +97,7 @@ for id, container in id_to_container.items():
     ticker = yf.Ticker(TICKER_NAME_TO_SYMBOL[ticker_name])
 
     # 現在値と前日比の表示
-    df = ticker.history(period="3d")
+    df = ticker.history(period="3d").sort_index()
     current_price = df["Close"].iloc[-1]
     previous_price = df["Close"].iloc[-2]
     change = (current_price - previous_price) / previous_price * 100

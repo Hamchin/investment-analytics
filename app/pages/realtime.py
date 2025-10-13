@@ -102,7 +102,7 @@ for id, container in id_to_container.items():
     previous_price = df["Close"].iloc[-2]
     change = (current_price - previous_price) / previous_price * 100
     color = "green" if change >= 0 else "red"
-    container.subheader(f"{current_price:.2f} :{color}[({change:.2f}%)]")
+    container.subheader(f"{current_price:.2f} :{color}[({change:+.2f}%)]")
 
     # チャートの表示
     df = ticker.history(period="1d", interval="1m").reset_index()

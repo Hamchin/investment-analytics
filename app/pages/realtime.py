@@ -42,12 +42,8 @@ def remove_ticker_data(id: str) -> None:
 
 if "realtime_ticker_data" not in st.session_state:
     st.session_state["realtime_ticker_data"] = {}
-    append_ticker_data("S&P500")
-    append_ticker_data("NASDAQ100")
-    append_ticker_data("QLD")
-    append_ticker_data("SOXL")
-    append_ticker_data("BTC")
-    append_ticker_data("ETH")
+    for ticker_name in TICKER_NAME_TO_SYMBOL:
+        append_ticker_data(ticker_name)
 
 id_to_container = {}
 

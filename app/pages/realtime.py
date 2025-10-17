@@ -6,11 +6,7 @@ import streamlit as st
 import yfinance as yf
 from constants import TICKER_NAME_TO_HOURS
 from constants import TICKER_NAME_TO_SYMBOL
-from streamlit_autorefresh import st_autorefresh
 
-
-# 1 分ごとに自動更新
-st_autorefresh(interval=60000)
 
 # ========== 各コンテナに入力ウィジェットを表示 ==========
 

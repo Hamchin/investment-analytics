@@ -3,5 +3,4 @@ pandas
 plotly
 python-dateutil
 streamlit
-streamlit-autorefresh
 yfinance

@@ -7,11 +7,7 @@ import yfinance as yf
 from constants import TICKER_NAME_TO_START_YEAR
 from constants import TICKER_NAME_TO_SYMBOL
 from dateutil.relativedelta import relativedelta
-from streamlit_autorefresh import st_autorefresh
 
-
-# 1 分ごとに自動更新
-st_autorefresh(interval=60000)
 
 # ========== 入力ウィジェットの表示 ==========
 

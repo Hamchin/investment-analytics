@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "investment-analytics"
+version = "1.0.0"
+requires-python = "~=3.14.0"
+dependencies = [
+    "numpy>=2.4.0",
+    "pandas>=2.3.0",
+    "plotly>=6.6.0",
+    "python-dateutil>=2.9.0",
+    "streamlit>=1.55.0",
+    "yfinance>=1.2.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "ruff",
+    "types-python-dateutil",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.tox]
+envlist = [
+    "py314",
+    "lint",
+    "mypy",
+]
+
+[tool.tox.env.lint]
+deps = [
+    "ruff",
+]
+commands = [
+    ["ruff", "check", "."],
+    ["ruff", "format", "--diff", "."],
+]
+skip_install = true
+
+[tool.tox.env.mypy]
+deps = [
+    "mypy",
+    "types-python-dateutil",
+]
+commands = [
+    ["mypy", "."],
+]
+
+[tool.tox.env.format]
+deps = [
+    "ruff",
+]
+commands = [
+    ["ruff", "check", "--fix", "."],
+    ["ruff", "format", "."],
+]
+skip_install = true

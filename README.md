@@ -2,39 +2,44 @@
 
 ## 開発方法
 
-#### 1. pyenv の設定
+### 環境構築
+
+#### 1. uv のインストール
 
 ```sh
-pyenv install 3.12
-pyenv local 3.12
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-#### 2. 仮想環境の作成
+参考：https://docs.astral.sh/uv/getting-started/installation
+
+#### 2. tox-uv のインストール
 
 ```sh
-python -m venv venv
+uv tool install tox --with tox-uv
 ```
 
-#### 3. 仮想環境のアクティベート
+参考：https://github.com/tox-dev/tox-uv
+
+#### 3. 仮想環境の構築
 
 ```sh
-source venv/bin/activate
+uv sync
 ```
 
-#### 4. 依存関係のインストール
+#### 4. Streamlit アプリケーションの起動
 
 ```sh
-pip install -r requirements.txt
+uv run streamlit run src/main.py --server.port 8080
 ```
 
-#### 5. Streamlit アプリケーションの起動
+### テスト
 
 ```sh
-streamlit run app/main.py --server.port 8080
+tox run-parallel
 ```
 
-#### 6. (開発終了時) 仮想環境の終了
+### フォーマット
 
 ```sh
-deactivate
+tox -e format
 ```

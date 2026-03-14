@@ -4,10 +4,10 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import yfinance as yf
-from constants import TICKER_NAME_TO_START_YEAR
-from constants import TICKER_NAME_TO_SYMBOL
 from dateutil.relativedelta import relativedelta
 
+from investment_analytics.constants import TICKER_NAME_TO_START_YEAR
+from investment_analytics.constants import TICKER_NAME_TO_SYMBOL
 
 # ========== 入力ウィジェットの表示 ==========
 
@@ -114,7 +114,7 @@ fig.update_traces(hovertemplate="日付: %{x|%Y-%m-%d}<br>終値: %{y:.2f} USD<e
 
 multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
 
-for date, row in weekly_df[weekly_df["Change"] * multiplier >= threshold].iterrows():
+for date, _ in weekly_df[weekly_df["Change"] * multiplier >= threshold].iterrows():
     fig.add_vrect(
         x0=date,
         x1=(date + pd.Timedelta(days=6)),

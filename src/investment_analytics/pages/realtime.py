@@ -4,9 +4,9 @@ import uuid
 import plotly.express as px
 import streamlit as st
 import yfinance as yf
-from constants import TICKER_NAME_TO_HOURS
-from constants import TICKER_NAME_TO_SYMBOL
 
+from investment_analytics.constants import TICKER_NAME_TO_HOURS
+from investment_analytics.constants import TICKER_NAME_TO_SYMBOL
 
 # ========== 各コンテナに入力ウィジェットを表示 ==========
 

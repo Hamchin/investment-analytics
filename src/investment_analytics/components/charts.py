@@ -93,8 +93,14 @@ def create_realtime_chart(
 
     fig = px.line(df, x="Datetime", y="Close")
     fig.add_hline(y=previous_price, line_dash="dot", line_color="gray")
-    fig.update_layout(xaxis_title=None, yaxis_title=None, height=300, hovermode="x unified")
     fig.update_xaxes(range=[start_time, end_time])
+    fig.update_layout(
+        xaxis_title=None,
+        yaxis_title=None,
+        height=200,
+        hovermode="x unified",
+        margin={"t": 0, "b": 0},
+    )
     fig.update_traces(
         line_color=color,
         hovertemplate=f"時間: %{{x|%Y-%m-%d %H:%M}}<br>価格: %{{y:.2f}} {unit}<extra></extra>",

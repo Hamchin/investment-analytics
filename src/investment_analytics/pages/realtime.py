@@ -38,6 +38,7 @@ for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data
         key=f"realtime_ticker_{id}",
         on_change=update_ticker_data,
         args=(id, f"realtime_ticker_{id}"),
+        label_visibility="collapsed",
     )
 
     # リアルタイム情報を表示するコンテナ
@@ -93,7 +94,7 @@ for id, container in id_to_container.items():
     recent_df = fetch_history(ticker.symbol, period="3d")
     current_price, previous_price, change = compute_realtime_change(recent_df)
     color = "green" if change >= 0 else "red"
-    container.subheader(f"{current_price:.2f} :{color}[({change:+.2f}%)]")
+    container.markdown(f"#### {current_price:.2f} :{color}[({change:+.2f}%)]")
 
     # チャートの表示
     df = fetch_history(ticker.symbol, period="1d", interval="1m").reset_index()
@@ -102,4 +103,4 @@ for id, container in id_to_container.items():
         continue
 
     fig = create_realtime_chart(df, previous_price, ticker.trading_hours, ticker.unit, color)
-    container.plotly_chart(fig, key=f"realtime_chart_{id}")
+    container.plotly_chart(fig, key=f"realtime_chart_{id}", config={"displayModeBar": False})

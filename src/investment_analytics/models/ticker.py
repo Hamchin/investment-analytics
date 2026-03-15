@@ -11,12 +11,14 @@ class Ticker:
     Attributes:
         name (str): 銘柄名.
         symbol (str): ティッカーシンボル.
+        unit (str): 価格の通貨単位.
         start_year (int): データの取得可能な開始年.
         trading_hours (float): 1 日あたりの取引時間.
     """
 
     name: str
     symbol: str
+    unit: str
     start_year: int
     trading_hours: float
 

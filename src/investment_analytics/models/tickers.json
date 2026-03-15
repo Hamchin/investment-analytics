@@ -1,41 +1,49 @@
 {
     "S&P500": {
         "symbol": "^GSPC",
+        "unit": "USD",
         "start_year": 1928,
         "trading_hours": 6.5
     },
     "NASDAQ100": {
         "symbol": "^NDX",
+        "unit": "USD",
         "start_year": 1985,
         "trading_hours": 6.5
     },
     "QLD": {
         "symbol": "QLD",
+        "unit": "USD",
         "start_year": 2006,
         "trading_hours": 6.5
     },
     "SOXL": {
         "symbol": "SOXL",
+        "unit": "USD",
         "start_year": 2010,
         "trading_hours": 6.5
     },
     "BTC": {
         "symbol": "BTC-USD",
+        "unit": "USD",
         "start_year": 2014,
         "trading_hours": 24
     },
     "ETH": {
         "symbol": "ETH-USD",
+        "unit": "USD",
         "start_year": 2017,
         "trading_hours": 24
     },
     "GOLD": {
         "symbol": "GC=F",
+        "unit": "USD",
         "start_year": 2000,
         "trading_hours": 24
     },
     "USD/JPY": {
         "symbol": "JPY=X",
+        "unit": "JPY",
         "start_year": 1996,
         "trading_hours": 24
     }

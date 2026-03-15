@@ -81,13 +81,13 @@ condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"
 
 st.caption(f"赤色のエリアは 1 週間で {threshold:.2f}% 以上の{condition}があった週を示します。")
 
-fig = create_price_chart(daily_df, weekly_df, threshold, condition)
+fig = create_price_chart(daily_df, weekly_df, ticker.unit, threshold, condition)
 st.plotly_chart(fig)
 
 st.subheader("日次データ")
 
-st.dataframe(style_daily_dataframe(daily_df))
+st.dataframe(style_daily_dataframe(daily_df, ticker.unit))
 
 st.subheader("週次データ")
 
-st.dataframe(style_weekly_dataframe(weekly_df))
+st.dataframe(style_weekly_dataframe(weekly_df, ticker.unit))

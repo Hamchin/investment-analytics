@@ -33,7 +33,7 @@ def move_ticker_data(id: str, direction: str) -> None:
 
     Args:
         id (str): 移動対象のカード ID.
-        direction (str): 移動方向.
+        direction (str): 移動方向 ("back" または "forward").
     """
     id_list = list(st.session_state["realtime_ticker_data"].keys())
     index = id_list.index(id)

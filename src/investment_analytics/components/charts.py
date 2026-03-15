@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 def create_price_chart(
     daily_df: pd.DataFrame,
     weekly_df: pd.DataFrame,
+    unit: str,
     threshold: float,
     condition: str,
 ) -> go.Figure:
@@ -19,6 +20,7 @@ def create_price_chart(
     Args:
         daily_df (pd.DataFrame): 日次の価格データを含む DataFrame.
         weekly_df (pd.DataFrame): 週次の価格・騰落率データを含む DataFrame.
+        unit (str): 価格の通貨単位.
         threshold (float): 強調表示する騰落率の閾値 (%).
         condition (str): 強調表示の条件 ("上昇" または "下落").
 
@@ -46,7 +48,7 @@ def create_price_chart(
         spikesnap="cursor",
     )
 
-    fig.update_traces(hovertemplate="日付: %{x|%Y-%m-%d}<br>終値: %{y:.2f} USD<extra></extra>")
+    fig.update_traces(hovertemplate=f"日付: %{{x|%Y-%m-%d}}<br>終値: %{{y:.2f}} {unit}<extra></extra>")
 
     multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
 
@@ -67,6 +69,7 @@ def create_realtime_chart(
     df: pd.DataFrame,
     previous_price: float,
     trading_hours: float,
+    unit: str,
     color: str,
 ) -> go.Figure:
     """
@@ -78,6 +81,7 @@ def create_realtime_chart(
         df (pd.DataFrame): 日中の価格データを含む DataFrame.
         previous_price (float): 前日終値.
         trading_hours (float): 取引時間.
+        unit (str): 価格の通貨単位.
         color (str): チャートの線色.
 
     Returns:
@@ -91,6 +95,9 @@ def create_realtime_chart(
     fig.add_hline(y=previous_price, line_dash="dot", line_color="gray")
     fig.update_layout(xaxis_title=None, yaxis_title=None, height=300, hovermode="x unified")
     fig.update_xaxes(range=[start_time, end_time])
-    fig.update_traces(line_color=color, hovertemplate="時間: %{x|%Y-%m-%d %H:%M}<br>価格: %{y:.2f} USD<extra></extra>")
+    fig.update_traces(
+        line_color=color,
+        hovertemplate=f"時間: %{{x|%Y-%m-%d %H:%M}}<br>価格: %{{y:.2f}} {unit}<extra></extra>",
+    )
 
     return fig

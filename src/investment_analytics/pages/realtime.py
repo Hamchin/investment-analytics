@@ -101,5 +101,5 @@ for id, container in id_to_container.items():
     if df.empty:
         continue
 
-    fig = create_realtime_chart(df, previous_price, ticker.trading_hours, color)
+    fig = create_realtime_chart(df, previous_price, ticker.trading_hours, ticker.unit, color)
     container.plotly_chart(fig, key=f"realtime_chart_{id}")

@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import streamlit as st
 
 from investment_analytics.components.charts import create_realtime_chart
@@ -10,6 +12,8 @@ from investment_analytics.services.realtime_state import move_ticker_data
 from investment_analytics.services.realtime_state import remove_ticker_data
 from investment_analytics.services.realtime_state import update_ticker_data
 
+NUM_COLUMNS = 4
+
 st.title("リアルタイム分析")
 
 ticker_names = list(NAME_TO_TICKER)
@@ -18,12 +22,12 @@ init_ticker_data()
 
 id_to_container = {}
 
-global_columns = st.columns(3)
+global_columns = st.columns(NUM_COLUMNS)
 
-# 各コンテナに入力ウィジェットを表示
+# 各カードに入力ウィジェットを表示
 
 for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data"].items()):
-    global_column = global_columns[index % 3]
+    global_column = global_columns[index % NUM_COLUMNS]
     container = global_column.container(border=True)
 
     # 銘柄のセレクトボックス
@@ -40,30 +44,46 @@ for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data
     inner_container = container.container()
     id_to_container[id] = inner_container
 
-    # コンテナを移動・削除するボタン
-    button_columns = container.columns([1, 1, 1, 3])
-    button_columns[0].button(
+    # フッター
+    footer = container.columns(4)
+
+    # カードを左に移動するボタン
+    footer[0].button(
         ":material/arrow_back_ios_new:",
         key=f"move_back_ticker_{id}",
         on_click=move_ticker_data,
         args=(id, "back"),
+        use_container_width=True,
     )
-    button_columns[1].button(
+
+    # カードを右に移動するボタン
+    footer[1].button(
         ":material/arrow_forward_ios:",
         key=f"move_forward_ticker_{id}",
         on_click=move_ticker_data,
         args=(id, "forward"),
+        use_container_width=True,
     )
-    button_columns[2].button(
+
+    # 時系列分析へのリンクボタン
+    footer[2].link_button(
+        ":material/finance:",
+        f"history?ticker={quote(ticker_name)}",
+        use_container_width=True,
+    )
+
+    # カードを削除するボタン
+    footer[3].button(
         ":material/delete:",
         key=f"remove_ticker_{id}",
         on_click=remove_ticker_data,
         args=(id,),
+        use_container_width=True,
     )
 
 st.button(":material/add_2:", on_click=append_ticker_data)
 
-# 各コンテナにリアルタイム情報を表示
+# 各カードにリアルタイム情報を表示
 
 for id, container in id_to_container.items():
     ticker_name = st.session_state["realtime_ticker_data"][id]

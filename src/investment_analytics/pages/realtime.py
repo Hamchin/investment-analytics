@@ -1,49 +1,26 @@
-import datetime
-import uuid
-
-import plotly.express as px
 import streamlit as st
-import yfinance as yf
 
-from investment_analytics.constants import TICKER_NAME_TO_HOURS
-from investment_analytics.constants import TICKER_NAME_TO_SYMBOL
-
-# ========== 各コンテナに入力ウィジェットを表示 ==========
+from investment_analytics.components.charts import create_realtime_chart
+from investment_analytics.models.ticker import NAME_TO_TICKER
+from investment_analytics.services.analysis import compute_realtime_change
+from investment_analytics.services.market_data import fetch_history
+from investment_analytics.services.realtime_state import append_ticker_data
+from investment_analytics.services.realtime_state import init_ticker_data
+from investment_analytics.services.realtime_state import move_ticker_data
+from investment_analytics.services.realtime_state import remove_ticker_data
+from investment_analytics.services.realtime_state import update_ticker_data
 
 st.title("リアルタイム分析")
 
+ticker_names = list(NAME_TO_TICKER)
 
-def append_ticker_data(ticker_name: str = "S&P500") -> None:
-    id = str(uuid.uuid4())
-    st.session_state["realtime_ticker_data"][id] = ticker_name
-
-
-def update_ticker_data(id: str, key: str) -> None:
-    st.session_state["realtime_ticker_data"][id] = st.session_state[key]
-
-
-def move_ticker_data(id: str, direction: str) -> None:
-    id_list = list(st.session_state["realtime_ticker_data"].keys())
-    index = id_list.index(id)
-    if direction == "back" and index > 0:
-        id_list[index], id_list[index - 1] = id_list[index - 1], id_list[index]
-    if direction == "forward" and index < len(id_list) - 1:
-        id_list[index], id_list[index + 1] = id_list[index + 1], id_list[index]
-    st.session_state["realtime_ticker_data"] = {id: st.session_state["realtime_ticker_data"][id] for id in id_list}
-
-
-def remove_ticker_data(id: str) -> None:
-    del st.session_state["realtime_ticker_data"][id]
-
-
-if "realtime_ticker_data" not in st.session_state:
-    st.session_state["realtime_ticker_data"] = {}
-    for ticker_name in TICKER_NAME_TO_SYMBOL:
-        append_ticker_data(ticker_name)
+init_ticker_data()
 
 id_to_container = {}
 
 global_columns = st.columns(3)
+
+# 各コンテナに入力ウィジェットを表示
 
 for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data"].items()):
     global_column = global_columns[index % 3]
@@ -52,8 +29,8 @@ for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data
     # 銘柄のセレクトボックス
     container.selectbox(
         "銘柄",
-        list(TICKER_NAME_TO_SYMBOL),
-        index=list(TICKER_NAME_TO_SYMBOL).index(ticker_name),
+        ticker_names,
+        index=ticker_names.index(ticker_name),
         key=f"realtime_ticker_{id}",
         on_change=update_ticker_data,
         args=(id, f"realtime_ticker_{id}"),
@@ -86,33 +63,23 @@ for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data
 
 st.button(":material/add_2:", on_click=append_ticker_data)
 
-# ========== 各コンテナにリアルタイム情報を表示 ==========
+# 各コンテナにリアルタイム情報を表示
 
 for id, container in id_to_container.items():
     ticker_name = st.session_state["realtime_ticker_data"][id]
-    ticker = yf.Ticker(TICKER_NAME_TO_SYMBOL[ticker_name])
+    ticker = NAME_TO_TICKER[ticker_name]
 
     # 現在値と前日比の表示
-    df = ticker.history(period="3d").sort_index()
-    current_price = df["Close"].iloc[-1]
-    previous_price = df["Close"].iloc[-2]
-    change = (current_price - previous_price) / previous_price * 100
+    recent_df = fetch_history(ticker.symbol, period="3d")
+    current_price, previous_price, change = compute_realtime_change(recent_df)
     color = "green" if change >= 0 else "red"
     container.subheader(f"{current_price:.2f} :{color}[({change:+.2f}%)]")
 
     # チャートの表示
-    df = ticker.history(period="1d", interval="1m").reset_index()
+    df = fetch_history(ticker.symbol, period="1d", interval="1m").reset_index()
 
     if df.empty:
         continue
 
-    df["Datetime"] = df["Datetime"].dt.tz_convert("Asia/Tokyo")
-    start_time = df["Datetime"].iloc[0]
-    end_time = start_time + datetime.timedelta(hours=TICKER_NAME_TO_HOURS[ticker_name])
-
-    fig = px.line(df, x="Datetime", y="Close")
-    fig.add_hline(y=previous_price, line_dash="dot", line_color="gray")
-    fig.update_layout(xaxis_title=None, yaxis_title=None, height=300, hovermode="x unified")
-    fig.update_xaxes(range=[start_time, end_time])
-    fig.update_traces(line_color=color, hovertemplate="時間: %{x|%Y-%m-%d %H:%M}<br>価格: %{y:.2f} USD<extra></extra>")
+    fig = create_realtime_chart(df, previous_price, ticker.trading_hours, color)
     container.plotly_chart(fig, key=f"realtime_chart_{id}")

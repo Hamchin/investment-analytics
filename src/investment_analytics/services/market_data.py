@@ -5,7 +5,7 @@ import yfinance as yf
 
 
 def fetch_history(
-    symbol: str,
+    ticker_symbol: str,
     period: str | None = None,
     interval: str = "1d",
     start: datetime.date | None = None,
@@ -15,7 +15,7 @@ def fetch_history(
     価格データを取得する.
 
     Args:
-        symbol (str): ティッカーシンボル.
+        ticker_symbol (str): 銘柄のシンボル.
         period (str | None, optional): 取得期間. (Default: None)
         interval (str, optional): データの間隔. (Default: "1d")
         start (datetime.date | None, optional): 取得開始日. (Default: None)
@@ -24,4 +24,4 @@ def fetch_history(
     Returns:
         pd.DataFrame: 価格データ.
     """
-    return yf.Ticker(symbol).history(period=period, interval=interval, start=start, end=end)
+    return yf.Ticker(ticker_symbol).history(period=period, interval=interval, start=start, end=end)

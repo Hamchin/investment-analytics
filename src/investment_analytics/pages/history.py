@@ -7,21 +7,20 @@ from investment_analytics.components.charts import create_price_chart
 from investment_analytics.components.styles import style_daily_dataframe
 from investment_analytics.components.styles import style_weekly_dataframe
 from investment_analytics.models.ticker import NAME_TO_TICKER
+from investment_analytics.models.ticker import SYMBOL_TO_TICKER
 from investment_analytics.services.analysis import compute_daily_metrics
 from investment_analytics.services.analysis import compute_weekly_metrics
 from investment_analytics.services.market_data import fetch_history
 
 st.title("時系列分析")
 
-ticker_names = list(NAME_TO_TICKER)
-
 # 入力: 銘柄
 ticker_name = st.selectbox(
     "銘柄",
-    ticker_names,
-    index=ticker_names.index(st.query_params.get("ticker", "S&P500")),
+    list(NAME_TO_TICKER),
+    index=list(SYMBOL_TO_TICKER).index(st.query_params.get("ticker", "^GSPC")),
     key="history_ticker",
-    on_change=lambda: st.query_params.update({"ticker": st.session_state["history_ticker"]}),
+    on_change=lambda: st.query_params.update({"ticker": NAME_TO_TICKER[st.session_state["history_ticker"]].symbol}),
 )
 ticker = NAME_TO_TICKER[ticker_name]
 

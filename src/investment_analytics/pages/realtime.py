@@ -4,6 +4,7 @@ import streamlit as st
 
 from investment_analytics.components.charts import create_realtime_chart
 from investment_analytics.models.ticker import NAME_TO_TICKER
+from investment_analytics.models.ticker import SYMBOL_TO_TICKER
 from investment_analytics.services.analysis import compute_realtime_change
 from investment_analytics.services.market_data import fetch_history
 from investment_analytics.services.realtime_state import append_ticker_data
@@ -16,8 +17,6 @@ NUM_COLUMNS = 4
 
 st.title("リアルタイム分析")
 
-ticker_names = list(NAME_TO_TICKER)
-
 init_ticker_data()
 
 id_to_container = {}
@@ -26,15 +25,15 @@ global_columns = st.columns(NUM_COLUMNS)
 
 # 各カードに入力ウィジェットを表示
 
-for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data"].items()):
+for index, (id, ticker_symbol) in enumerate(st.session_state["realtime_ticker_data"].items()):
     global_column = global_columns[index % NUM_COLUMNS]
     container = global_column.container(border=True)
 
     # 銘柄のセレクトボックス
     container.selectbox(
         "銘柄",
-        ticker_names,
-        index=ticker_names.index(ticker_name),
+        list(NAME_TO_TICKER),
+        index=list(SYMBOL_TO_TICKER).index(ticker_symbol),
         key=f"realtime_ticker_{id}",
         on_change=update_ticker_data,
         args=(id, f"realtime_ticker_{id}"),
@@ -69,7 +68,7 @@ for index, (id, ticker_name) in enumerate(st.session_state["realtime_ticker_data
     # 時系列分析へのリンクボタン
     footer[2].link_button(
         ":material/finance:",
-        f"history?ticker={quote(ticker_name)}",
+        f"history?ticker={quote(ticker_symbol)}",
         use_container_width=True,
     )
 
@@ -87,8 +86,8 @@ st.button(":material/add_2:", on_click=append_ticker_data)
 # 各カードにリアルタイム情報を表示
 
 for id, container in id_to_container.items():
-    ticker_name = st.session_state["realtime_ticker_data"][id]
-    ticker = NAME_TO_TICKER[ticker_name]
+    ticker_symbol = st.session_state["realtime_ticker_data"][id]
+    ticker = SYMBOL_TO_TICKER[ticker_symbol]
 
     # 現在値と前日比の表示
     recent_df = fetch_history(ticker.symbol, period="3d")

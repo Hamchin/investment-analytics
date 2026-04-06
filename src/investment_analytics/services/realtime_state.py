@@ -4,16 +4,27 @@ import streamlit as st
 
 from investment_analytics.models.ticker import NAME_TO_TICKER
 
+DEFAULT_TICKER_SYMBOLS = [
+    "^GSPC",
+    "^NDX",
+    "QLD",
+    "SOXL",
+    "BTC-USD",
+    "ETH-USD",
+    "GC=F",
+    "JPY=X",
+]
 
-def append_ticker_data(ticker_name: str = "S&P500") -> None:
+
+def append_ticker_data(ticker_symbol: str = "^GSPC") -> None:
     """
     銘柄カードを追加する.
 
     Args:
-        ticker_name (str): 銘柄名.
+        ticker_symbol (str): 銘柄のシンボル.
     """
     id = str(uuid.uuid4())
-    st.session_state["realtime_ticker_data"][id] = ticker_name
+    st.session_state["realtime_ticker_data"][id] = ticker_symbol
 
 
 def update_ticker_data(id: str, key: str) -> None:
@@ -24,7 +35,9 @@ def update_ticker_data(id: str, key: str) -> None:
         id (str): 変更対象のカード ID.
         key (str): 銘柄名が保存されているセッションステートのキー.
     """
-    st.session_state["realtime_ticker_data"][id] = st.session_state[key]
+    ticker_name = st.session_state[key]
+    ticker_symbol = NAME_TO_TICKER[ticker_name].symbol
+    st.session_state["realtime_ticker_data"][id] = ticker_symbol
 
 
 def move_ticker_data(id: str, direction: str) -> None:
@@ -63,5 +76,5 @@ def init_ticker_data() -> None:
     """
     if "realtime_ticker_data" not in st.session_state:
         st.session_state["realtime_ticker_data"] = {}
-        for ticker_name in NAME_TO_TICKER:
-            append_ticker_data(ticker_name)
+        for ticker_symbol in DEFAULT_TICKER_SYMBOLS:
+            append_ticker_data(ticker_symbol)

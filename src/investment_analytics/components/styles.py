@@ -23,7 +23,7 @@ def style_daily_dataframe(df: pd.DataFrame, unit: str) -> Styler:
     mad_column = "移動平均乖離率 (%)"
 
     renamer = {"Close": close_column, "Change": change_column, "MAD": mad_column}
-    formatted_df = formatted_df.rename(columns=renamer)
+    formatted_df = formatted_df.rename(columns=renamer).round(2)
 
     formatted_df.index = formatted_df.index.date
     formatted_df.index.name = "日付"
@@ -37,7 +37,7 @@ def style_daily_dataframe(df: pd.DataFrame, unit: str) -> Styler:
         styles[mad_column] = color_deviation
         return styles
 
-    formatter = {close_column: "{:.2f}", change_column: "{:+.2f}%", mad_column: "{:+.2f}%"}
+    formatter = {close_column: "{:,.2f}", change_column: "{:+.2f}%", mad_column: "{:+.2f}%"}
     return formatted_df.style.apply(apply_color, axis=1).format(formatter)
 
 
@@ -60,7 +60,7 @@ def style_weekly_dataframe(df: pd.DataFrame, unit: str) -> Styler:
     change_column = "騰落率 (%)"
 
     renamer = {"Close": close_column, "Change": change_column}
-    formatted_df = formatted_df.rename(columns=renamer)
+    formatted_df = formatted_df.rename(columns=renamer).round(2)
 
     formatted_df.index = formatted_df.index.date
     formatted_df.index.name = "日付"
@@ -72,5 +72,5 @@ def style_weekly_dataframe(df: pd.DataFrame, unit: str) -> Styler:
         styles[change_column] = color_return
         return styles
 
-    formatter = {close_column: "{:.2f}", change_column: "{:+.2f}%"}
+    formatter = {close_column: "{:,.2f}", change_column: "{:+.2f}%"}
     return formatted_df.style.apply(apply_color, axis=1).format(formatter)

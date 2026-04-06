@@ -48,7 +48,7 @@ def create_price_chart(
         spikesnap="cursor",
     )
 
-    fig.update_traces(hovertemplate=f"日付: %{{x|%Y-%m-%d}}<br>終値: %{{y:.2f}} {unit}<extra></extra>")
+    fig.update_traces(hovertemplate=f"日付: %{{x|%Y-%m-%d}}<br>終値: %{{y:,.2f}} {unit}<extra></extra>")
 
     multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
 
@@ -103,7 +103,7 @@ def create_realtime_chart(
     )
     fig.update_traces(
         line_color=color,
-        hovertemplate=f"時間: %{{x|%Y-%m-%d %H:%M}}<br>価格: %{{y:.2f}} {unit}<extra></extra>",
+        hovertemplate=f"時間: %{{x|%Y-%m-%d %H:%M}}<br>価格: %{{y:,.2f}} {unit}<extra></extra>",
     )
 
     return fig

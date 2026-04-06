@@ -95,7 +95,7 @@ for id, container in id_to_container.items():
     recent_df = fetch_history(ticker.symbol, period="3d")
     current_price, previous_price, change = compute_realtime_change(recent_df)
     color = "green" if change >= 0 else "red"
-    container.markdown(f"#### {current_price:.2f} :{color}[({change:+.2f}%)]")
+    container.markdown(f"#### {current_price:,.2f} :{color}[({change:+.2f}%)]")
 
     # チャートの表示
     df = fetch_history(ticker.symbol, period="1d", interval="1m").reset_index()

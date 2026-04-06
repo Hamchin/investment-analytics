@@ -1,6 +1,7 @@
 from urllib.parse import quote
 
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
 
 from investment_analytics.components.charts import create_realtime_chart
 from investment_analytics.models.ticker import NAME_TO_TICKER
@@ -19,13 +20,14 @@ st.title("リアルタイム分析")
 
 init_ticker_data()
 
-id_to_container = {}
+id_to_container: dict[str, DeltaGenerator] = {}
+id_to_ticker_symbol: dict[str, str] = st.session_state["realtime_ticker_data"]
 
 global_columns = st.columns(NUM_COLUMNS)
 
 # 各カードに入力ウィジェットを表示
 
-for index, (id, ticker_symbol) in enumerate(st.session_state["realtime_ticker_data"].items()):
+for index, (id, ticker_symbol) in enumerate(id_to_ticker_symbol.items()):
     global_column = global_columns[index % NUM_COLUMNS]
     container = global_column.container(border=True)
 

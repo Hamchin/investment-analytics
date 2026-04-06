@@ -17,10 +17,34 @@
         "start_year": 2006,
         "trading_hours": 6.5
     },
+    "TQQQ": {
+        "name": "TQQQ",
+        "unit": "USD",
+        "start_year": 2010,
+        "trading_hours": 6.5
+    },
     "SOXL": {
         "name": "SOXL",
         "unit": "USD",
         "start_year": 2010,
+        "trading_hours": 6.5
+    },
+    "ACWI": {
+        "name": "ACWI",
+        "unit": "USD",
+        "start_year": 2008,
+        "trading_hours": 6.5
+    },
+    "1306.T": {
+        "name": "TOPIX",
+        "unit": "JPY",
+        "start_year": 2008,
+        "trading_hours": 6.5
+    },
+    "^N225": {
+        "name": "Nikkei 225",
+        "unit": "JPY",
+        "start_year": 1965,
         "trading_hours": 6.5
     },
     "BTC-USD": {
@@ -29,9 +53,21 @@
         "start_year": 2014,
         "trading_hours": 24
     },
+    "BTC-JPY": {
+        "name": "Bitcoin JPY",
+        "unit": "JPY",
+        "start_year": 2014,
+        "trading_hours": 24
+    },
     "ETH-USD": {
         "name": "Ethereum USD",
         "unit": "USD",
+        "start_year": 2017,
+        "trading_hours": 24
+    },
+    "ETH-JPY": {
+        "name": "Ethereum JPY",
+        "unit": "JPY",
         "start_year": 2017,
         "trading_hours": 24
     },

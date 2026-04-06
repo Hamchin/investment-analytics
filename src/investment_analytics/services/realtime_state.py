@@ -8,9 +8,11 @@ DEFAULT_TICKER_SYMBOLS = [
     "^GSPC",
     "^NDX",
     "QLD",
-    "SOXL",
+    "TQQQ",
     "BTC-USD",
+    "BTC-JPY",
     "ETH-USD",
+    "ETH-JPY",
     "GC=F",
     "JPY=X",
 ]

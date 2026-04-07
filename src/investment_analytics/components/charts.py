@@ -1,109 +1,153 @@
-import datetime
-
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 
 
-def create_price_chart(
+def create_history_chart_options(
     daily_df: pd.DataFrame,
     weekly_df: pd.DataFrame,
-    unit: str,
     threshold: float,
     condition: str,
-) -> go.Figure:
+) -> dict:
     """
-    時系列の価格チャートを生成する.
+    時系列チャートの ECharts オプションを生成する.
 
     週次の騰落率が閾値を超えた期間を赤色で強調表示する.
 
     Args:
-        daily_df (pd.DataFrame): 日次の価格データを含む DataFrame.
-        weekly_df (pd.DataFrame): 週次の価格・騰落率データを含む DataFrame.
-        unit (str): 価格の通貨単位.
+        daily_df (pd.DataFrame): 日次の価格データ.
+        weekly_df (pd.DataFrame): 週次の騰落率データ.
         threshold (float): 強調表示する騰落率の閾値 (%).
         condition (str): 強調表示の条件 ("上昇" または "下落").
 
     Returns:
-        go.Figure: Plotly の Figure オブジェクト.
+        dict: ECharts オプション.
     """
-    fig = px.line(daily_df.reset_index(), x="Date", y="Close")
+    dates = daily_df.index.strftime("%Y-%m-%d").tolist()
+    prices = daily_df["Close"].round(2).tolist()
 
-    fig.update_layout(xaxis_title="日付", yaxis_title="終値", hovermode="x unified")
-
-    fig.update_xaxes(
-        rangeslider_visible=True,
-        showline=True,
-        showgrid=True,
-        showspikes=True,
-        spikemode="across",
-        spikesnap="cursor",
-    )
-
-    fig.update_yaxes(
-        showline=True,
-        showgrid=True,
-        showspikes=True,
-        spikemode="across",
-        spikesnap="cursor",
-    )
-
-    fig.update_traces(hovertemplate=f"日付: %{{x|%Y-%m-%d}}<br>終値: %{{y:,.2f}} {unit}<extra></extra>")
+    mark_area_data: list[list[dict]] = []
 
     multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
+    filtered_weekly_df = weekly_df[weekly_df["Change"] * multiplier >= threshold]
 
-    for date, _ in weekly_df[weekly_df["Change"] * multiplier >= threshold].iterrows():
-        fig.add_vrect(
-            x0=date,
-            x1=(date + pd.Timedelta(days=6)),
-            fillcolor="red",
-            opacity=0.2,
-            layer="below",
-            line_width=0,
+    for date, _ in filtered_weekly_df.iterrows():
+        week_start = pd.Timestamp(date).strftime("%Y-%m-%d")
+        week_end = (pd.Timestamp(date) + pd.Timedelta(days=6)).strftime("%Y-%m-%d")
+
+        start_date = max(date for date in dates if date < week_start)
+        end_date = max(date for date in dates if date <= week_end)
+
+        mark_area_data.append(
+            [
+                {"xAxis": start_date, "itemStyle": {"color": "rgba(255, 0, 0, 0.2)"}},
+                {"xAxis": end_date},
+            ]
         )
 
-    return fig
+    return {
+        "animation": False,
+        "tooltip": {
+            "trigger": "axis",
+            "axisPointer": {"type": "cross"},
+        },
+        "grid": {"left": 50, "right": 24, "top": 24, "bottom": 60},
+        "xAxis": {
+            "type": "category",
+            "data": dates,
+            "boundaryGap": False,
+        },
+        "yAxis": {
+            "type": "value",
+            "scale": True,
+        },
+        "dataZoom": [
+            {
+                "type": "inside",
+                "xAxisIndex": 0,
+            },
+            {
+                "type": "slider",
+                "xAxisIndex": 0,
+                "height": 24,
+                "bottom": 10,
+            },
+        ],
+        "series": [
+            {
+                "type": "line",
+                "smooth": False,
+                "showSymbol": False,
+                "lineStyle": {"width": 2, "color": "#2563eb"},
+                "data": prices,
+                "markArea": {
+                    "silent": True,
+                    "data": mark_area_data,
+                },
+            },
+        ],
+    }
 
 
-def create_realtime_chart(
+def create_realtime_chart_options(
     df: pd.DataFrame,
     previous_price: float,
     trading_hours: float,
-    unit: str,
     color: str,
-) -> go.Figure:
+) -> dict:
     """
-    リアルタイムの日中チャートを生成する.
+    リアルタイムチャートの ECharts オプションを生成する.
 
     前日終値を基準線として表示し, 取引時間の範囲で X 軸を設定する.
 
     Args:
-        df (pd.DataFrame): 日中の価格データを含む DataFrame.
+        df (pd.DataFrame): 日中の価格データ.
         previous_price (float): 前日終値.
         trading_hours (float): 取引時間.
-        unit (str): 価格の通貨単位.
         color (str): チャートの線色.
 
     Returns:
-        go.Figure: Plotly の Figure オブジェクト.
+        dict: ECharts オプション.
     """
-    df["Datetime"] = df["Datetime"].dt.tz_convert("Asia/Tokyo")
-    start_time = df["Datetime"].iloc[0]
-    end_time = start_time + datetime.timedelta(hours=trading_hours)
+    df = df.copy()
+    df.index = pd.to_datetime(df.index).tz_convert("Asia/Tokyo")
 
-    fig = px.line(df, x="Datetime", y="Close")
-    fig.add_hline(y=previous_price, line_dash="dot", line_color="gray")
-    fig.update_xaxes(range=[start_time, end_time])
-    fig.update_layout(
-        xaxis_title=None,
-        yaxis_title=None,
-        height=200,
-        hovermode="x unified",
-        margin={"t": 0, "b": 0},
-    )
-    fig.update_traces(
-        line_color=color,
-        hovertemplate=f"時間: %{{x|%Y-%m-%d %H:%M}}<br>価格: %{{y:,.2f}} {unit}<extra></extra>",
-    )
+    start_time = df.index[0]
+    end_time = start_time + pd.Timedelta(hours=trading_hours)
+    chart_data = [[index.isoformat(), round(price, 2)] for index, price in df["Close"].items()]
 
-    return fig
+    return {
+        "animation": False,
+        "tooltip": {
+            "trigger": "axis",
+            "axisPointer": {"type": "cross"},
+        },
+        "grid": {"left": 0, "right": 0, "top": 0, "bottom": 0},
+        "xAxis": {
+            "type": "time",
+            "min": start_time.isoformat(),
+            "max": end_time.isoformat(),
+            "boundaryGap": False,
+            "axisLabel": {"formatter": "{HH}:{mm}"},
+            "axisPointer": {"label": {"show": False}},
+        },
+        "yAxis": {
+            "type": "value",
+            "scale": True,
+            "axisPointer": {"label": {"show": False}},
+        },
+        "series": [
+            {
+                "type": "line",
+                "smooth": False,
+                "showSymbol": False,
+                "lineStyle": {"width": 2, "color": color},
+                "data": chart_data,
+                "markLine": {
+                    "silent": True,
+                    "symbol": "none",
+                    "lineStyle": {"type": "dashed", "color": "#9ca3af", "width": 1},
+                    "label": {"show": False},
+                    "data": [{"yAxis": previous_price}],
+                },
+            }
+        ],
+    }

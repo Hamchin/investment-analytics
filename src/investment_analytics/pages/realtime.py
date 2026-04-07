@@ -2,8 +2,9 @@ from urllib.parse import quote
 
 import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
+from streamlit_echarts import st_echarts
 
-from investment_analytics.components.charts import create_realtime_chart
+from investment_analytics.components.charts import create_realtime_chart_options
 from investment_analytics.models.ticker import NAME_TO_TICKER
 from investment_analytics.models.ticker import SYMBOL_TO_TICKER
 from investment_analytics.services.analysis import compute_realtime_change
@@ -98,10 +99,12 @@ for id, container in id_to_container.items():
     container.markdown(f"#### {current_price:,.2f} :{color}[({change:+.2f}%)]")
 
     # チャートの表示
-    df = fetch_history(ticker.symbol, period="1d", interval="1m").reset_index()
+    df = fetch_history(ticker.symbol, period="1d", interval="1m")
 
     if df.empty:
         continue
 
-    fig = create_realtime_chart(df, previous_price, ticker.trading_hours, ticker.unit, color)
-    container.plotly_chart(fig, key=f"realtime_chart_{id}", config={"displayModeBar": False})
+    options = create_realtime_chart_options(df, previous_price, ticker.trading_hours, color)
+
+    with container:
+        st_echarts(options, key=f"realtime_chart_{id}", height="200px")

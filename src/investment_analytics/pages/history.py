@@ -2,8 +2,9 @@ import datetime
 
 import streamlit as st
 from dateutil.relativedelta import relativedelta
+from streamlit_echarts import st_echarts
 
-from investment_analytics.components.charts import create_price_chart
+from investment_analytics.components.charts import create_history_chart_options
 from investment_analytics.components.styles import style_daily_dataframe
 from investment_analytics.components.styles import style_weekly_dataframe
 from investment_analytics.models.ticker import NAME_TO_TICKER
@@ -80,8 +81,8 @@ condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"
 
 st.caption(f"赤色のエリアは 1 週間で {threshold:.2f}% 以上の{condition}があった週を示します。")
 
-fig = create_price_chart(daily_df, weekly_df, ticker.unit, threshold, condition)
-st.plotly_chart(fig)
+options = create_history_chart_options(daily_df, weekly_df, threshold, condition)
+st_echarts(options, key="history_chart", height="400px")
 
 col_daily, col_weekly = st.columns(2)
 

@@ -38,6 +38,22 @@ def compute_weekly_metrics(daily_df: pd.DataFrame, start_date: datetime.date) ->
     return weekly_df[weekly_df.index.date >= start_date]
 
 
+def compute_period_change(df: pd.DataFrame) -> tuple[float, float]:
+    """
+    日次の価格データから現在値・騰落率を算出する.
+
+    Args:
+        df (pd.DataFrame): 日次の価格データ.
+
+    Returns:
+        tuple[float, float]: 現在値, 騰落率.
+    """
+    current_price = df["Close"].iloc[-1]
+    base_price = df["Close"].iloc[0]
+    change = (current_price - base_price) / base_price * 100
+    return current_price, change
+
+
 def compute_realtime_change(df: pd.DataFrame) -> tuple[float, float, float]:
     """
     直近の価格データから現在値・前日終値・騰落率を算出する.

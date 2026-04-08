@@ -10,6 +10,7 @@ from investment_analytics.components.styles import style_weekly_dataframe
 from investment_analytics.models.ticker import NAME_TO_TICKER
 from investment_analytics.models.ticker import SYMBOL_TO_TICKER
 from investment_analytics.services.analysis import compute_daily_metrics
+from investment_analytics.services.analysis import compute_period_change
 from investment_analytics.services.analysis import compute_weekly_metrics
 from investment_analytics.services.market_data import fetch_history
 
@@ -79,8 +80,14 @@ col_threshold, col_condition = chart_settings_expander.columns(2)
 threshold = col_threshold.number_input("強調表示の閾値 (%)", min_value=0.0, value=5.0, step=0.1)
 condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"), index=1)
 
+# 現在値と騰落率の表示
+current_price, change = compute_period_change(daily_df)
+color = "green" if change >= 0 else "red"
+st.markdown(f"#### {current_price:,.2f} :{color}[({change:+.2f}%)]")
+
 st.caption(f"赤色のエリアは 1 週間で {threshold:.2f}% 以上の{condition}があった週を示します。")
 
+# チャートの表示
 options = create_history_chart_options(daily_df, weekly_df, threshold, condition)
 st_echarts(options, key="history_chart", height="400px")
 

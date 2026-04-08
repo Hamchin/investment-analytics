@@ -14,7 +14,7 @@ def create_history_chart_options(
 
     Args:
         daily_df (pd.DataFrame): 日次の価格データ.
-        weekly_df (pd.DataFrame): 週次の騰落率データ.
+        weekly_df (pd.DataFrame): 週次の価格データ.
         threshold (float): 強調表示する騰落率の閾値 (%).
         condition (str): 強調表示の条件 ("上昇" または "下落").
 

@@ -9,7 +9,7 @@ def style_daily_dataframe(df: pd.DataFrame, unit: str) -> Styler:
     列を日本語名に変換し, 値の正負に応じて緑色・赤色で色分けする.
 
     Args:
-        df (pd.DataFrame): 日次 DataFrame.
+        df (pd.DataFrame): 日次の価格データ.
         unit (str): 価格の通貨単位.
 
     Returns:
@@ -48,7 +48,7 @@ def style_weekly_dataframe(df: pd.DataFrame, unit: str) -> Styler:
     列を日本語名に変換し, 値の正負に応じて緑色・赤色で色分けする.
 
     Args:
-        df (pd.DataFrame): 週次 DataFrame.
+        df (pd.DataFrame): 週次の価格データ.
         unit (str): 価格の通貨単位.
 
     Returns:

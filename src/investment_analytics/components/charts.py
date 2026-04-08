@@ -23,6 +23,7 @@ def create_history_chart_options(
     """
     dates = daily_df.index.strftime("%Y-%m-%d").tolist()
     prices = daily_df["Close"].round(2).tolist()
+    y_axis_padding = (max(prices) - min(prices)) * 0.05
 
     mark_area_data: list[list[dict]] = []
 
@@ -57,6 +58,9 @@ def create_history_chart_options(
         "yAxis": {
             "type": "value",
             "scale": True,
+            "min": min(prices) - y_axis_padding,
+            "max": max(prices) + y_axis_padding,
+            "axisLabel": {"showMinLabel": False, "showMaxLabel": False},
         },
         "dataZoom": [
             {

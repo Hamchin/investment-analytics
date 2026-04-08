@@ -111,6 +111,11 @@ def create_realtime_chart_options(
 
     start_time = df.index[0]
     end_time = start_time + pd.Timedelta(hours=trading_hours)
+
+    min_visible_price = min(df["Close"].min(), previous_price)
+    max_visible_price = max(df["Close"].max(), previous_price)
+    y_axis_padding = (max_visible_price - min_visible_price) * 0.05
+
     chart_data = [[index.isoformat(), round(price, 2)] for index, price in df["Close"].items()]
 
     return {
@@ -131,6 +136,9 @@ def create_realtime_chart_options(
         "yAxis": {
             "type": "value",
             "scale": True,
+            "min": min_visible_price - y_axis_padding,
+            "max": max_visible_price + y_axis_padding,
+            "axisLabel": {"showMinLabel": False, "showMaxLabel": False},
             "axisPointer": {"label": {"show": False}},
         },
         "series": [

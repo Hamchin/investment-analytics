@@ -25,11 +25,12 @@ def create_history_chart_options(
     daily_df = daily_df.dropna(subset=["Close"])
     daily_df.index = pd.to_datetime(daily_df.index)
 
+    current_price = daily_df["Close"].iloc[-1]
     min_visible_price = daily_df["Close"].min()
     max_visible_price = daily_df["Close"].max()
     y_axis_padding = (max_visible_price - min_visible_price) * 0.05
 
-    mark_area_data: list[list[dict]] = []
+    highlight_area_list: list[list[dict]] = []
 
     multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
     filtered_weekly_df = weekly_df[weekly_df["Change"] * multiplier >= threshold]
@@ -41,7 +42,7 @@ def create_history_chart_options(
         start_date = max(date for date in daily_df.index if date < week_start)
         end_date = max(date for date in daily_df.index if date <= week_end)
 
-        mark_area_data.append(
+        highlight_area_list.append(
             [
                 {"xAxis": start_date.strftime("%Y-%m-%d"), "itemStyle": {"color": "rgba(255, 0, 0, 0.2)"}},
                 {"xAxis": end_date.strftime("%Y-%m-%d")},
@@ -87,7 +88,13 @@ def create_history_chart_options(
                 "data": daily_df["Close"].round(2).tolist(),
                 "markArea": {
                     "silent": True,
-                    "data": mark_area_data,
+                    "data": highlight_area_list,
+                },
+                "markLine": {
+                    "silent": True,
+                    "symbol": "none",
+                    "lineStyle": {"type": "dashed", "color": "#9ca3af", "width": 1},
+                    "data": [{"yAxis": current_price}],
                 },
             },
         ],

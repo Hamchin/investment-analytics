@@ -21,26 +21,30 @@ def create_history_chart_options(
     Returns:
         dict: ECharts オプション.
     """
-    dates = daily_df.index.strftime("%Y-%m-%d").tolist()
-    prices = daily_df["Close"].round(2).tolist()
-    y_axis_padding = (max(prices) - min(prices)) * 0.05
+    daily_df = daily_df.copy()
+    daily_df = daily_df.dropna(subset=["Close"])
+    daily_df.index = pd.to_datetime(daily_df.index)
+
+    min_visible_price = daily_df["Close"].min()
+    max_visible_price = daily_df["Close"].max()
+    y_axis_padding = (max_visible_price - min_visible_price) * 0.05
 
     mark_area_data: list[list[dict]] = []
 
     multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
     filtered_weekly_df = weekly_df[weekly_df["Change"] * multiplier >= threshold]
 
-    for date, _ in filtered_weekly_df.iterrows():
-        week_start = pd.Timestamp(date).strftime("%Y-%m-%d")
-        week_end = (pd.Timestamp(date) + pd.Timedelta(days=6)).strftime("%Y-%m-%d")
+    for date in filtered_weekly_df.index:
+        week_start = pd.Timestamp(date)
+        week_end = pd.Timestamp(date) + pd.Timedelta(days=6)
 
-        start_date = max(date for date in dates if date < week_start)
-        end_date = max(date for date in dates if date <= week_end)
+        start_date = max(date for date in daily_df.index if date < week_start)
+        end_date = max(date for date in daily_df.index if date <= week_end)
 
         mark_area_data.append(
             [
-                {"xAxis": start_date, "itemStyle": {"color": "rgba(255, 0, 0, 0.2)"}},
-                {"xAxis": end_date},
+                {"xAxis": start_date.strftime("%Y-%m-%d"), "itemStyle": {"color": "rgba(255, 0, 0, 0.2)"}},
+                {"xAxis": end_date.strftime("%Y-%m-%d")},
             ]
         )
 
@@ -52,14 +56,14 @@ def create_history_chart_options(
         },
         "xAxis": {
             "type": "category",
-            "data": dates,
+            "data": daily_df.index.strftime("%Y-%m-%d").tolist(),
             "boundaryGap": False,
         },
         "yAxis": {
             "type": "value",
             "scale": True,
-            "min": min(prices) - y_axis_padding,
-            "max": max(prices) + y_axis_padding,
+            "min": min_visible_price - y_axis_padding,
+            "max": max_visible_price + y_axis_padding,
             "axisLabel": {"showMinLabel": False, "showMaxLabel": False},
         },
         "dataZoom": [
@@ -80,7 +84,7 @@ def create_history_chart_options(
                 "smooth": False,
                 "showSymbol": False,
                 "lineStyle": {"width": 2, "color": "#2563eb"},
-                "data": prices,
+                "data": daily_df["Close"].round(2).tolist(),
                 "markArea": {
                     "silent": True,
                     "data": mark_area_data,
@@ -111,6 +115,7 @@ def create_realtime_chart_options(
         dict: ECharts オプション.
     """
     df = df.copy()
+    df = df.dropna(subset=["Close"])
     df.index = pd.to_datetime(df.index).tz_convert("Asia/Tokyo")
 
     start_time = df.index[0]

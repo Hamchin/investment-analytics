@@ -42,39 +42,39 @@
         "trading_hours": 6.5
     },
     "^N225": {
-        "name": "Nikkei 225",
+        "name": "日経平均株価",
         "unit": "JPY",
         "start_year": 1965,
         "trading_hours": 6.5
-    },
-    "BTC-USD": {
-        "name": "Bitcoin USD",
-        "unit": "USD",
-        "start_year": 2014,
-        "trading_hours": 24
-    },
-    "BTC-JPY": {
-        "name": "Bitcoin JPY",
-        "unit": "JPY",
-        "start_year": 2014,
-        "trading_hours": 24
-    },
-    "ETH-USD": {
-        "name": "Ethereum USD",
-        "unit": "USD",
-        "start_year": 2017,
-        "trading_hours": 24
-    },
-    "ETH-JPY": {
-        "name": "Ethereum JPY",
-        "unit": "JPY",
-        "start_year": 2017,
-        "trading_hours": 24
     },
     "GC=F": {
         "name": "Gold",
         "unit": "USD",
         "start_year": 2000,
+        "trading_hours": 24
+    },
+    "BTC-USD": {
+        "name": "BTC/USD",
+        "unit": "USD",
+        "start_year": 2014,
+        "trading_hours": 24
+    },
+    "BTC-JPY": {
+        "name": "BTC/JPY",
+        "unit": "JPY",
+        "start_year": 2014,
+        "trading_hours": 24
+    },
+    "ETH-USD": {
+        "name": "ETH/USD",
+        "unit": "USD",
+        "start_year": 2017,
+        "trading_hours": 24
+    },
+    "ETH-JPY": {
+        "name": "ETH/JPY",
+        "unit": "JPY",
+        "start_year": 2017,
         "trading_hours": 24
     },
     "JPY=X": {

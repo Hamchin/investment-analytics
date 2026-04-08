@@ -38,7 +38,7 @@ if period_mode == "期間":
     period_name = st.selectbox("期間", list(period_name_to_period), index=0)
     period = period_name_to_period[period_name]
     end_date = datetime.date.today() + datetime.timedelta(days=1)
-    start_date = end_date - relativedelta(years=period)
+    start_date = datetime.date.today() - relativedelta(years=period)
 
 # 入力: 開始年・終了年
 if period_mode == "開始年・終了年":

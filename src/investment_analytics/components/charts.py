@@ -10,13 +10,14 @@ def create_history_chart_options(
     """
     時系列チャートの ECharts オプションを生成する.
 
-    週次の騰落率が閾値を超えた期間を赤色で強調表示する.
+    - 週次の騰落率が閾値を超えた期間をハイライトする.
+    - 現在値を基準線として表示する.
 
     Args:
         daily_df (pd.DataFrame): 日次の価格データ.
         weekly_df (pd.DataFrame): 週次の価格データ.
-        threshold (float): 強調表示する騰落率の閾値 (%).
-        condition (str): 強調表示の条件 ("上昇" または "下落").
+        threshold (float): ハイライトする騰落率の閾値 (%).
+        condition (str): ハイライトの条件 ("上昇" または "下落").
 
     Returns:
         dict: ECharts オプション.
@@ -110,7 +111,8 @@ def create_realtime_chart_options(
     """
     リアルタイムチャートの ECharts オプションを生成する.
 
-    前日終値を基準線として表示し, 取引時間の範囲で X 軸を設定する.
+    - 前日終値を基準線として表示する.
+    - 取引時間の範囲で X 軸を設定する.
 
     Args:
         df (pd.DataFrame): 日中の価格データ.

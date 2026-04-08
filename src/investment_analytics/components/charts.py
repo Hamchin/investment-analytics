@@ -4,8 +4,8 @@ import pandas as pd
 def create_history_chart_options(
     daily_df: pd.DataFrame,
     weekly_df: pd.DataFrame,
-    threshold: float,
-    condition: str,
+    highlight_threshold: float,
+    highlight_condition: str,
 ) -> dict:
     """
     時系列チャートの ECharts オプションを生成する.
@@ -16,8 +16,8 @@ def create_history_chart_options(
     Args:
         daily_df (pd.DataFrame): 日次の価格データ.
         weekly_df (pd.DataFrame): 週次の価格データ.
-        threshold (float): ハイライトする騰落率の閾値 (%).
-        condition (str): ハイライトの条件 ("上昇" または "下落").
+        highlight_threshold (float): ハイライトする騰落率の閾値 (%).
+        highlight_condition (str): ハイライトの条件 ("上昇" または "下落").
 
     Returns:
         dict: ECharts オプション.
@@ -33,8 +33,8 @@ def create_history_chart_options(
 
     highlight_area_list: list[list[dict]] = []
 
-    multiplier = 1 if condition == "上昇" else -1 if condition == "下落" else 0
-    filtered_weekly_df = weekly_df[weekly_df["Change"] * multiplier >= threshold]
+    multiplier = 1 if highlight_condition == "上昇" else -1 if highlight_condition == "下落" else 0
+    filtered_weekly_df = weekly_df[weekly_df["Change"] * multiplier >= highlight_threshold]
 
     for date in filtered_weekly_df.index:
         week_start = pd.Timestamp(date)
@@ -91,8 +91,8 @@ def create_history_chart_options(
 
 def create_realtime_chart_options(
     df: pd.DataFrame,
-    previous_price: float,
     trading_hours: float,
+    previous_price: float,
     color: str,
 ) -> dict:
     """
@@ -103,8 +103,8 @@ def create_realtime_chart_options(
 
     Args:
         df (pd.DataFrame): 日中の価格データ.
-        previous_price (float): 前日終値.
         trading_hours (float): 取引時間.
+        previous_price (float): 前日終値.
         color (str): チャートの線色.
 
     Returns:

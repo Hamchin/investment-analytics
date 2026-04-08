@@ -104,7 +104,7 @@ for id, container in id_to_container.items():
     if df.empty:
         continue
 
-    options = create_realtime_chart_options(df, previous_price, ticker.trading_hours, color)
+    options = create_realtime_chart_options(df, ticker.trading_hours, previous_price, color)
 
     with container:
         st_echarts(options, key=f"realtime_chart_{id}", height="200px")

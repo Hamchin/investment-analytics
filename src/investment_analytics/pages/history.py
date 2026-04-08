@@ -76,19 +76,19 @@ chart_settings_expander = st.expander("設定")
 
 col_threshold, col_condition = chart_settings_expander.columns(2)
 
-# 入力: 強調表示の閾値と条件
-threshold = col_threshold.number_input("強調表示の閾値 (%)", min_value=0.0, value=5.0, step=0.1)
-condition = col_condition.selectbox("強調表示の条件", ("上昇", "下落"), index=1)
+# 入力: ハイライトの閾値と条件
+highlight_threshold = col_threshold.number_input("ハイライトの閾値 (%)", min_value=0.0, value=5.0, step=0.1)
+highlight_condition = col_condition.selectbox("ハイライトの条件", ("上昇", "下落"), index=1)
 
 # 現在値と騰落率の表示
 current_price, change = compute_period_change(daily_df)
 color = "green" if change >= 0 else "red"
 st.markdown(f"#### {current_price:,.2f} :{color}[({change:+.2f}%)]")
 
-st.caption(f"赤色のエリアは 1 週間で {threshold:.2f}% 以上の{condition}があった週を示します。")
+st.caption(f"赤色のエリアは 1 週間で {highlight_threshold:.2f}% 以上の{highlight_condition}があった週を示します。")
 
 # チャートの表示
-options = create_history_chart_options(daily_df, weekly_df, threshold, condition)
+options = create_history_chart_options(daily_df, weekly_df, highlight_threshold, highlight_condition)
 st_echarts(options, key="history_chart", height="400px")
 
 col_daily, col_weekly = st.columns(2)

@@ -49,7 +49,6 @@ def create_history_chart_options(
             "trigger": "axis",
             "axisPointer": {"type": "cross"},
         },
-        "grid": {"left": 50, "right": 24, "top": 24, "bottom": 60},
         "xAxis": {
             "type": "category",
             "data": dates,

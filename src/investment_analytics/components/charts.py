@@ -63,23 +63,10 @@ def create_history_chart_options(
         },
         "yAxis": {
             "type": "value",
-            "scale": True,
             "min": min_visible_price - y_axis_padding,
             "max": max_visible_price + y_axis_padding,
             "axisLabel": {"showMinLabel": False, "showMaxLabel": False},
         },
-        "dataZoom": [
-            {
-                "type": "inside",
-                "xAxisIndex": 0,
-            },
-            {
-                "type": "slider",
-                "xAxisIndex": 0,
-                "height": 24,
-                "bottom": 10,
-            },
-        ],
         "series": [
             {
                 "type": "line",
@@ -153,7 +140,6 @@ def create_realtime_chart_options(
         },
         "yAxis": {
             "type": "value",
-            "scale": True,
             "min": min_visible_price - y_axis_padding,
             "max": max_visible_price + y_axis_padding,
             "axisLabel": {"showMinLabel": False, "showMaxLabel": False},

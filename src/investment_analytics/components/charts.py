@@ -1,4 +1,30 @@
 import pandas as pd
+from matplotlib import colors
+
+
+def _create_area_gradient(color: str) -> dict:
+    """
+    チャートのエリアグラデーションを生成する.
+
+    Args:
+        color (str): ベースとなる色.
+
+    Returns:
+        dict: グラデーションの設定.
+    """
+    red, green, blue = [int(value * 255) for value in colors.to_rgb(color)]
+
+    return {
+        "type": "linear",
+        "x": 0,
+        "y": 0,
+        "x2": 0,
+        "y2": 1,
+        "colorStops": [
+            {"offset": 0, "color": f"rgba({red}, {green}, {blue}, 0.35)"},
+            {"offset": 1, "color": f"rgba({red}, {green}, {blue}, 0.05)"},
+        ],
+    }
 
 
 def create_history_chart_options(
@@ -6,6 +32,7 @@ def create_history_chart_options(
     weekly_df: pd.DataFrame,
     highlight_threshold: float,
     highlight_condition: str,
+    color: str,
 ) -> dict:
     """
     時系列チャートの ECharts オプションを生成する.
@@ -18,6 +45,7 @@ def create_history_chart_options(
         weekly_df (pd.DataFrame): 週次の価格データ.
         highlight_threshold (float): ハイライトする騰落率の閾値 (%).
         highlight_condition (str): ハイライトの条件 ("上昇" または "下落").
+        color (str): チャートの色.
 
     Returns:
         dict: ECharts オプション.
@@ -72,7 +100,8 @@ def create_history_chart_options(
                 "type": "line",
                 "smooth": False,
                 "showSymbol": False,
-                "lineStyle": {"width": 2, "color": "#2563eb"},
+                "lineStyle": {"width": 2, "color": color},
+                "areaStyle": {"color": _create_area_gradient(color)},
                 "data": daily_df["Close"].round(2).tolist(),
                 "markArea": {
                     "silent": True,
@@ -105,7 +134,7 @@ def create_realtime_chart_options(
         df (pd.DataFrame): 日中の価格データ.
         trading_hours (float): 取引時間.
         previous_price (float): 前日終値.
-        color (str): チャートの線色.
+        color (str): チャートの色.
 
     Returns:
         dict: ECharts オプション.
@@ -151,6 +180,7 @@ def create_realtime_chart_options(
                 "smooth": False,
                 "showSymbol": False,
                 "lineStyle": {"width": 2, "color": color},
+                "areaStyle": {"color": _create_area_gradient(color)},
                 "data": chart_data,
                 "markLine": {
                     "silent": True,

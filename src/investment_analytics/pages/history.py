@@ -88,7 +88,7 @@ st.markdown(f"#### {current_price:,.2f} :{color}[({change:+.2f}%)]")
 st.caption(f"赤色のエリアは 1 週間で {highlight_threshold:.2f}% 以上の{highlight_condition}があった週を示します。")
 
 # チャートの表示
-options = create_history_chart_options(daily_df, weekly_df, highlight_threshold, highlight_condition)
+options = create_history_chart_options(daily_df, weekly_df, highlight_threshold, highlight_condition, color)
 st_echarts(options, key="history_chart", height="400px")
 
 col_daily, col_weekly = st.columns(2)

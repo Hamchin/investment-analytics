@@ -2,7 +2,8 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from matplotlib import colors
+
+from investment_analytics.components.colors import to_rgb_format
 
 
 def _create_area_gradient(color: str) -> dict:
@@ -15,8 +16,6 @@ def _create_area_gradient(color: str) -> dict:
     Returns:
         dict: グラデーションの設定.
     """
-    red, green, blue = [int(value * 255) for value in colors.to_rgb(color)]
-
     return {
         "type": "linear",
         "x": 0,
@@ -24,8 +23,8 @@ def _create_area_gradient(color: str) -> dict:
         "x2": 0,
         "y2": 1,
         "colorStops": [
-            {"offset": 0, "color": f"rgba({red}, {green}, {blue}, 0.35)"},
-            {"offset": 1, "color": f"rgba({red}, {green}, {blue}, 0.05)"},
+            {"offset": 0, "color": to_rgb_format(color, 0.5)},
+            {"offset": 1, "color": to_rgb_format(color, 0.0)},
         ],
     }
 
@@ -53,6 +52,8 @@ def create_history_chart_options(
     Returns:
         dict: ECharts オプション.
     """
+    assert highlight_condition in ("上昇", "下落")
+
     daily_df = daily_df.copy()
     daily_df = daily_df.dropna(subset=["Close"])
     daily_df.index = pd.to_datetime(daily_df.index)
@@ -64,7 +65,8 @@ def create_history_chart_options(
 
     highlight_area_list: list[list[dict]] = []
 
-    multiplier = 1 if highlight_condition == "上昇" else -1 if highlight_condition == "下落" else 0
+    multiplier = 1 if highlight_condition == "上昇" else -1
+    highlight_color = to_rgb_format("green", 0.2) if highlight_condition == "上昇" else to_rgb_format("red", 0.2)
     filtered_weekly_df = weekly_df[weekly_df["Change"] * multiplier >= highlight_threshold]
 
     for date in filtered_weekly_df.index:
@@ -76,7 +78,7 @@ def create_history_chart_options(
 
         highlight_area_list.append(
             [
-                {"xAxis": start_date.strftime("%Y-%m-%d"), "itemStyle": {"color": "rgba(239, 68, 68, 0.2)"}},
+                {"xAxis": start_date.strftime("%Y-%m-%d"), "itemStyle": {"color": highlight_color}},
                 {"xAxis": end_date.strftime("%Y-%m-%d")},
             ]
         )
@@ -104,7 +106,7 @@ def create_history_chart_options(
                 "type": "line",
                 "smooth": False,
                 "showSymbol": False,
-                "lineStyle": {"width": 2, "color": color},
+                "lineStyle": {"width": 2, "color": to_rgb_format(color)},
                 "areaStyle": {"color": _create_area_gradient(color)},
                 "data": daily_df["Close"].round(2).tolist(),
                 "markArea": {
@@ -198,7 +200,7 @@ def create_realtime_chart_options(
                 "type": "line",
                 "smooth": False,
                 "showSymbol": False,
-                "lineStyle": {"width": 2, "color": color},
+                "lineStyle": {"width": 2, "color": to_rgb_format(color)},
                 "areaStyle": {"color": _create_area_gradient(color)},
                 "data": chart_data,
                 "markLine": {

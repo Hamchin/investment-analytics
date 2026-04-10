@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pandas as pd
 from matplotlib import colors
 
@@ -73,7 +76,7 @@ def create_history_chart_options(
 
         highlight_area_list.append(
             [
-                {"xAxis": start_date.strftime("%Y-%m-%d"), "itemStyle": {"color": "rgba(255, 0, 0, 0.2)"}},
+                {"xAxis": start_date.strftime("%Y-%m-%d"), "itemStyle": {"color": "rgba(239, 68, 68, 0.2)"}},
                 {"xAxis": end_date.strftime("%Y-%m-%d")},
             ]
         )
@@ -84,6 +87,7 @@ def create_history_chart_options(
             "trigger": "axis",
             "axisPointer": {"type": "cross"},
         },
+        "grid": {"top": 10},
         "xAxis": {
             "type": "category",
             "data": daily_df.index.strftime("%Y-%m-%d").tolist(),
@@ -116,6 +120,21 @@ def create_history_chart_options(
             },
         ],
     }
+
+
+def create_history_chart_html(options: dict) -> str:
+    """
+    時系列チャートを表示するための HTML を生成する.
+
+    Args:
+        options (dict): ECharts オプション.
+
+    Returns:
+        str: HTML.
+    """
+    path = Path(__file__).parent / "history_chart.html"
+    html = path.read_text()
+    return html.replace("__ECHARTS_OPTIONS__", json.dumps(options, ensure_ascii=False))
 
 
 def create_realtime_chart_options(

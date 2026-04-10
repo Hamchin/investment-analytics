@@ -24,7 +24,10 @@ dev = [
 ]
 
 [tool.setuptools.package-data]
-investment_analytics = ["**/*.json"]
+investment_analytics = [
+    "**/*.json",
+    "**/*.html",
+]
 
 [tool.mypy]
 ignore_missing_imports = true

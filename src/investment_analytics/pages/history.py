@@ -2,8 +2,8 @@ import datetime
 
 import streamlit as st
 from dateutil.relativedelta import relativedelta
-from streamlit_echarts import st_echarts
 
+from investment_analytics.components.charts import create_history_chart_html
 from investment_analytics.components.charts import create_history_chart_options
 from investment_analytics.components.styles import style_daily_dataframe
 from investment_analytics.components.styles import style_weekly_dataframe
@@ -89,7 +89,7 @@ st.caption(f"赤色のエリアは 1 週間で {highlight_threshold:.2f}% 以上
 
 # チャートの表示
 options = create_history_chart_options(daily_df, weekly_df, highlight_threshold, highlight_condition, color)
-st_echarts(options, key="history_chart", height="400px")
+st.iframe(create_history_chart_html(options), height=400)
 
 col_daily, col_weekly = st.columns(2)
 

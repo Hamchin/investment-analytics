@@ -14,6 +14,7 @@ DEFAULT_TICKER_SYMBOLS = [
     "ETH-USD",
     "ETH-JPY",
     "GC=F",
+    "^N225",
     "JPY=X",
 ]
 
